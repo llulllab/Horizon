@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +13,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* ═══ DESIGN SYSTEM ═══ */
         :root {
@@ -1142,14 +1140,13 @@
             </div>
         </div>
         <div class="header-actions">
-            <button class="header-btn json-btn" id="jsonBtn" onclick="downloadJSON()" aria-label="Download proposal as JSON">
+
+            <button class="header-btn visible" id="newSessionBtn" onclick="newSession()" aria-label="Start new session">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
                 </svg>
-                JSON
+                New
             </button>
             <button class="header-btn docx-btn" id="docxBtn" onclick="downloadDOCX()" aria-label="Download Part B as DOCX">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1159,14 +1156,7 @@
                 </svg>
                 DOCX
             </button>
-            <button class="header-btn" id="exportBtn" onclick="exportPDF()" aria-label="Export conversation as PDF">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                PDF
-            </button>
+
             <div class="status-badge" aria-live="polite">
                 <div class="status-dot" aria-hidden="true"></div>
                 Online
@@ -1198,10 +1188,7 @@
                 <button class="hint-chip" onclick="sendHint(this)">Help me find the right call</button>
                 <button class="hint-chip" onclick="sendHint(this)">I need to prepare a RIA proposal</button>
             </div>
-            <div class="welcome-divider" aria-hidden="true"></div>
-            <div class="welcome-hints">
-                <button class="hint-chip test-chip" onclick="simulateProposal()">⚡ Test: Simulate Proposal Output</button>
-            </div>
+
         </div>
     </main>
 
@@ -1239,7 +1226,7 @@
         // ── Configuration ──
         const CONFIG = {
             webhookUrl: 'https://n8n.tropus.io/webhook/horizon',
-            sessionId: 'session-' + Math.random().toString(36).substr(2, 9),
+            sessionId: 'session-' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID().slice(0,12) : Math.random().toString(36).substr(2, 9)),
             apiKey: ''
         };
 
@@ -1257,109 +1244,40 @@
         window.sendMessage = sendMessage;
         window.handleKey = handleKey;
         window.autoResize = autoResize;
-        window.simulateProposal = simulateProposal;
+        window.newSession = newSession;
         window.downloadDOCX = downloadDOCX;
         window.downloadJSON = downloadJSON;
-        window.exportPDF = exportPDF;
 
-        // ── TEST MODE: Simulate a proposal response ──
-        function simulateProposal() {
-            const welcome = document.getElementById('welcomeScreen');
-            if (welcome) welcome.remove();
-
-            const fakeProposal = {
-                proposal_ready: true,
-                metadata: {
-                    project_title: "Smart Urban Green Infrastructure for Climate Resilience",
-                    acronym: "SUGICR",
-                    call_identifier: "HORIZON-CL6-2025-BIODIV-01-01",
-                    action_type: "RIA",
-                    duration_months: 48,
-                    total_budget_eur: 4500000,
-                    eu_contribution_eur: 4500000,
-                    trl_start: 3,
-                    trl_target: 6
-                },
-                section_1_excellence: {
-                    s1_1_objectives_and_ambition: "The SUGICR project aims to develop and validate an integrated framework for smart urban green infrastructure (UGI) that enhances climate resilience in European cities.\n\nSpecific objectives:\n(1) Develop a digital twin platform for urban green infrastructure.\n(2) Create AI-driven decision support tools for optimal UGI placement.\n(3) Validate the framework in 5 pilot cities across different European climate zones.\n(4) Establish standardised metrics for measuring UGI effectiveness.\n(5) Build capacity among urban planners for evidence-based UGI decisions.",
-                    s1_2_relation_to_work_programme: "SUGICR directly addresses the Horizon Europe Work Programme Cluster 6 priorities on biodiversity and ecosystem services in urban environments. The project aligns with the European Green Deal objectives and the EU Biodiversity Strategy for 2030.",
-                    s1_3_concept_and_methodology: "The project employs a multi-disciplinary approach combining remote sensing, IoT sensor networks, machine learning, and participatory urban planning methodologies.",
-                    s1_4_interdisciplinary_considerations: "SUGICR brings together expertise from environmental science, urban planning, computer science, social science, and public health."
-                },
-                section_2_impact: {
-                    s2_1_pathways_towards_impact: "The project creates impact through three main pathways: (1) Scientific advancement, (2) Technological innovation through the digital twin platform, (3) Policy influence through evidence-based guidelines.",
-                    s2_2_dissemination_exploitation_communication: "A comprehensive dissemination strategy includes peer-reviewed publications (target: 25+), conference presentations, policy briefs, open-source software releases, and stakeholder workshops.",
-                    s2_3_impact_indicators: [
-                        { indicator: "Peer-reviewed publications", target: "25+", measurement: "Publication count in indexed journals" },
-                        { indicator: "Cities adopting framework", target: "15 by 2030", measurement: "MoU signatures" },
-                        { indicator: "Urban green coverage increase", target: "8% in pilot cities", measurement: "Satellite imagery analysis" },
-                        { indicator: "Policy briefs produced", target: "10", measurement: "Document count" }
-                    ]
-                },
-                section_3_implementation: {
-                    s3_1_work_packages: [
-                        { wp_number: 1, title: "Project Management", lead_partner: "TU Berlin", person_months: 36, start_month: 1, end_month: 48, description: "Overall project coordination and reporting.", tasks: [{ task_id: "T1.1", title: "Coordination", description: "Day-to-day management" }] },
-                        { wp_number: 2, title: "Data Collection", lead_partner: "CNRS", person_months: 48, start_month: 1, end_month: 18, description: "Data collection across pilot cities.", tasks: [{ task_id: "T2.1", title: "Remote sensing", description: "Satellite imagery collection" }] },
-                        { wp_number: 3, title: "Digital Twin Platform", lead_partner: "Fraunhofer IGD", person_months: 60, start_month: 6, end_month: 36, description: "Core digital twin platform development.", tasks: [{ task_id: "T3.1", title: "Platform dev", description: "Backend and frontend" }] },
-                        { wp_number: 4, title: "AI Decision Tools", lead_partner: "ETH Zurich", person_months: 42, start_month: 12, end_month: 42, description: "ML model development for UGI optimization.", tasks: [{ task_id: "T4.1", title: "ML models", description: "Training and validation" }] },
-                        { wp_number: 5, title: "Pilot Validation", lead_partner: "City of Barcelona", person_months: 36, start_month: 24, end_month: 46, description: "Validation in Berlin, Barcelona, Amsterdam, Vienna, Lisbon.", tasks: [{ task_id: "T5.1", title: "Deployment", description: "Testing in pilot cities" }] },
-                        { wp_number: 6, title: "Dissemination", lead_partner: "ICLEI Europe", person_months: 24, start_month: 1, end_month: 48, description: "Knowledge dissemination and sustainability planning.", tasks: [{ task_id: "T6.1", title: "Publications", description: "Papers and conferences" }] }
-                    ],
-                    s3_2_consortium: {
-                        coordinator: { name: "TU Berlin", country: "Germany", type: "University", role: "Coordination, WP1 lead" },
-                        partners: [
-                            { name: "CNRS", country: "France", type: "Research Org", role: "WP2 lead, data science", person_months: 48, budget_eur: 650000 },
-                            { name: "Fraunhofer IGD", country: "Germany", type: "Research Org", role: "WP3 lead, digital twin", person_months: 60, budget_eur: 850000 },
-                            { name: "ETH Zurich", country: "Switzerland", type: "University", role: "WP4 lead, AI/ML", person_months: 42, budget_eur: 600000 },
-                            { name: "City of Barcelona", country: "Spain", type: "Public Authority", role: "WP5 lead, pilots", person_months: 30, budget_eur: 400000 },
-                            { name: "ICLEI Europe", country: "Germany", type: "Non-profit", role: "WP6 lead, dissemination", person_months: 24, budget_eur: 350000 }
-                        ],
-                        consortium_added_value: "The consortium combines world-class research institutions with practical urban implementation expertise."
-                    },
-                    s3_3_milestones: [
-                        { id: "MS1", title: "Baseline complete", related_wp: "WP2", due_month: 18, verification_means: "Report approved" },
-                        { id: "MS2", title: "Platform v1.0", related_wp: "WP3", due_month: 30, verification_means: "Platform online" },
-                        { id: "MS3", title: "AI models validated", related_wp: "WP4", due_month: 36, verification_means: "Accuracy >85%" },
-                        { id: "MS4", title: "Pilots complete", related_wp: "WP5", due_month: 42, verification_means: "City reports" },
-                        { id: "MS5", title: "Framework published", related_wp: "WP6", due_month: 48, verification_means: "Published online" }
-                    ],
-                    s3_4_deliverables: [
-                        { id: "D2.1", title: "Baseline Report", related_wp: "WP2", due_month: 18, type: "Report", dissemination_level: "Public" },
-                        { id: "D3.1", title: "Digital Twin v1.0", related_wp: "WP3", due_month: 30, type: "Software", dissemination_level: "Public" },
-                        { id: "D4.1", title: "AI Tools", related_wp: "WP4", due_month: 36, type: "Software", dissemination_level: "Public" },
-                        { id: "D5.1", title: "Pilot Report", related_wp: "WP5", due_month: 44, type: "Report", dissemination_level: "Public" },
-                        { id: "D6.1", title: "UGI Guidelines", related_wp: "WP6", due_month: 48, type: "Report", dissemination_level: "Public" }
-                    ],
-                    s3_5_budget_summary: {
-                        personnel_costs: 2800000,
-                        subcontracting: 200000,
-                        travel_costs: 300000,
-                        equipment: 350000,
-                        other_direct_costs: 250000,
-                        indirect_costs: 600000
-                    }
-                },
-                part_a_admin: {
-                    abstract: "SUGICR develops an integrated smart urban green infrastructure framework combining digital twin technology, AI-driven decision support, and participatory planning to enhance climate resilience in European cities.",
-                    keywords: ["urban green infrastructure", "climate resilience", "digital twin", "AI", "urban planning"],
-                    panels: ["ENV", "ICT"]
-                }
-            };
-
-            lastProposalData = fakeProposal;
-            lastDocxFilename = 'SUGICR_PartB_Draft.docx';
+        // ── New Session ──
+        function newSession() {
+            if (isWaiting) return;
+            CONFIG.sessionId = 'session-' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36).substr(-4);
+            lastProposalData = null;
             lastDocxBase64 = null;
-
-            document.getElementById('docxBtn').classList.add('visible');
-            document.getElementById('jsonBtn').classList.add('visible');
-
-            addMessage(
-                'Your Horizon Europe proposal draft for **Smart Urban Green Infrastructure for Climate Resilience** (SUGICR) has been generated successfully. The structured data and the Part B document are ready for download.',
-                'bot',
-                fakeProposal
-            );
-
-            showSuccess('Test proposal simulated. Try the download buttons.');
+            lastDocxFilename = null;
+            lastBotRaw = '';
+            botMessageCount = 0;
+            lastMsgType = null;
+            document.getElementById('docxBtn').classList.remove('visible');
+            var container = document.getElementById('convContainer');
+            container.innerHTML =
+                '<div class="welcome" id="welcomeScreen">' +
+                    '<div class="horizon-ring" aria-hidden="true">' +
+                        '<div class="horizon-ring-outer"></div>' +
+                        '<div class="horizon-ring-inner">' +
+                            '<div class="horizon-ring-stars">🇪🇺</div>' +
+                        '</div>' +
+                        '<div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div>' +
+                    '</div>' +
+                    '<h2>Your <em>Horizon</em> Begins Here</h2>' +
+                    '<p>Prepare your Horizon Europe proposal step by step. Share your project idea and I\'ll guide you through the full Part B application structure.</p>' +
+                    '<div class="welcome-hints">' +
+                        '<button class="hint-chip" onclick="sendHint(this)">I have a project idea</button>' +
+                        '<button class="hint-chip" onclick="sendHint(this)">Help me find the right call</button>' +
+                        '<button class="hint-chip" onclick="sendHint(this)">I need to prepare a RIA proposal</button>' +
+                    '</div>' +
+                '</div>';
+            showSuccess('New session started.');
         }
 
         // ── Send hint chip ──
@@ -1466,10 +1384,7 @@
                         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' +
                         'Download JSON' +
                     '</button>' +
-                    '<button class="proposal-action-btn secondary" onclick="exportPDF()">' +
-                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' +
-                        'Export Conversation PDF' +
-                    '</button>' +
+
                 '</div>' +
             '</div>';
         }
@@ -1516,7 +1431,6 @@
             if (type === 'bot') {
                 lastBotRaw = content;
                 botMessageCount++;
-                document.getElementById('exportBtn').classList.add('visible');
             }
         }
 
@@ -1602,12 +1516,10 @@
                     lastDocxBase64 = data.docx_base64;
                     lastDocxFilename = data.filename || 'Horizon_PartB_Draft.docx';
                     document.getElementById('docxBtn').classList.add('visible');
-                    document.getElementById('jsonBtn').classList.add('visible');
                     var msg = data.message || 'Your proposal draft is ready. You can download the Part B document below.';
                     addMessage(msg, 'bot', lastProposalData);
                 } else if (data && data.proposal_json && !data.docx_base64) {
                     lastProposalData = data.proposal_json;
-                    document.getElementById('jsonBtn').classList.add('visible');
                     var msg2 = data.message || data.conversation_text || 'Your structured proposal data is ready.';
                     addMessage(msg2, 'bot', lastProposalData);
                 } else if (data && data.conversation_text) {
@@ -1679,93 +1591,6 @@
             }
         }
 
-        // ── Export Conversation as PDF ──
-        function exportPDF() {
-            var container = document.getElementById('convContainer');
-            if (!container) return;
-            var allBotMessagesContent = container.querySelectorAll('.message.bot .msg-content');
-
-            var allContentHTML = '';
-            if (allBotMessagesContent.length === 0) {
-                showError('No assistant messages to export yet.');
-                return;
-            }
-
-            allBotMessagesContent.forEach(function(contentEl) {
-                var clonedContent = contentEl.cloneNode(true);
-                var cards = clonedContent.querySelectorAll('.proposal-card');
-                cards.forEach(function(card) { card.remove(); });
-                clonedContent.removeAttribute('style');
-                clonedContent.removeAttribute('class');
-
-                var styledContent = clonedContent.innerHTML
-                    .replace(/<h2[^>]*>/g, '<h2 style="font-family:\'Cormorant Garamond\',serif;font-size:14pt;color:#8a7434;margin:24px 0 10px 0;padding-bottom:4px;border-bottom:1px solid #e0d8c8;">')
-                    .replace(/<h3[^>]*>/g, '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:12pt;color:#8a7434;margin:18px 0 8px 0;">')
-                    .replace(/<strong[^>]*>/g, '<strong style="color:#0d1321;">')
-                    .replace(/<em[^>]*>/g, '<em style="color:#555; font-style: italic;">')
-                    .replace(/<blockquote[^>]*>/g, '<blockquote style="border-left:3px solid #c9a84c;padding:8px 14px;margin:10px 0;background:#faf8f2;color:#555;">')
-                    .replace(/<th[^>]*>/g, '<th style="background:#f5f0e0;color:#8a7434;font-weight:600;border:1px solid #ddd;padding:8px 10px;font-size:10pt;text-align:left;">')
-                    .replace(/<td[^>]*>/g, '<td style="border:1px solid #ddd;padding:8px 10px;font-size:10pt;text-align:left;">')
-                    .replace(/<table[^>]*>/g, '<table style="border-collapse:collapse;width:100%;margin:12px 0;">')
-                    .replace(/<code[^>]*>/g, '<code style="font-family:monospace;font-size:9pt;background:#f5f0e0;padding:2px 6px;border-radius:3px;color:#8a7434;">')
-                    .replace(/<p[^>]*>/g, '<p style="margin:6px 0;color:#333;">')
-                    .replace(/<hr[^>]*>/g, '<hr style="border:none;border-top:1px solid #e0d8c8;margin:16px 0;">');
-
-                allContentHTML += styledContent;
-            });
-
-            var now = new Date();
-            var dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
-
-            var tempDiv = document.createElement('div');
-            tempDiv.id = 'pdfTempExport';
-            tempDiv.style.cssText = 'position:absolute;left:-9999px;top:0;width:794px;background:#ffffff;color:#0d1321;font-family:"Outfit",sans-serif;font-size:11pt;line-height:1.6;padding:40px;';
-
-            tempDiv.innerHTML =
-                '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #c9a84c;padding-bottom:16px;margin-bottom:28px;">' +
-                    '<div>' +
-                        '<h1 style="font-family:\'Cormorant Garamond\',serif;font-size:16pt;color:#0d1321;letter-spacing:0.02em;margin:0;">LLULL LAB</h1>' +
-                        '<div style="font-size:10pt;color:#666;margin-top:4px;">Horizon Europe — Conversation Log</div>' +
-                    '</div>' +
-                    '<div style="font-size:9pt;color:#888;text-align:right;">' +
-                        'Generated: ' + dateStr + '<br>' +
-                        'Session: ' + CONFIG.sessionId +
-                    '</div>' +
-                '</div>' +
-                allContentHTML +
-                '<div style="margin-top:32px;padding-top:12px;border-top:1px solid #e0d8c8;font-size:8pt;color:#aaa;text-align:center;">' +
-                    'This document was generated by the Llull Lab Horizon Project Tool. It is a conversation log and should be reviewed before use.' +
-                '</div>';
-
-            document.body.appendChild(tempDiv);
-
-            setTimeout(function() {
-                if (typeof html2pdf === 'undefined') {
-                    document.body.removeChild(tempDiv);
-                    showError('PDF export library not loaded.');
-                    return;
-                }
-                html2pdf().set({
-                    margin: [15, 15, 20, 15],
-                    filename: 'Horizon_Log_' + now.toISOString().slice(0,10) + '.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: {
-                        scale: 2,
-                        useCORS: true,
-                        logging: false,
-                        windowWidth: 794
-                    },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-                }).from(tempDiv).save().then(function() {
-                    document.body.removeChild(tempDiv);
-                }).catch(function(err) {
-                    console.error('PDF export error:', err);
-                    if (document.body.contains(tempDiv)) document.body.removeChild(tempDiv);
-                    showError('PDF export failed. Check console for details.');
-                });
-            }, 50);
-        }
 
     })();
     </script>
