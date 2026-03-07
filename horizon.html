@@ -1,0 +1,1792 @@
+<!--
+  ═══════════════════════════════════════════════════════════
+  3 KARARLAR
+  ═══════════════════════════════════════════════════════════
+  1. KİŞİLİK — Brüksel'de bir Avrupa Komisyonu koridorunda yürüyen,
+     lacivert keten blazer giymiş, gömleğinin yakasına küçük bir altın
+     AB yıldızı rozeti takmış genç araştırma politikası danışmanı.
+     Ciddi ama ilham verici. Font: keskin serif display + temiz sans body.
+     Renk: derin lacivert + antik altın. Ton: profesyonel, vizyoner.
+
+  2. SÜRPRIZ — Welcome ekranında büyük bir conic-gradient dönen
+     "Horizon Ring" — AB fonlarını simgeleyen altın-mavi halka.
+     Konuşma başladığında ring küçülüp solarak kaybolur.
+
+  3. RİTİM — Welcome → conversation → proposal geçişlerinde sıcaklık kayması:
+     soğuk lacivert beklemeden, altın vurgulu aktif sohbete. Mesajlar
+     arasında ince gradient-fade ayraçlar ile nefes alan boşluklar.
+  ═══════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llull Lab — Horizon Project Tool</title>
+    <meta name="description" content="Prepare your Horizon Europe proposal step by step with the Llull Lab AI assistant. Structured guidance for Part B documents.">
+    <meta property="og:title" content="Llull Lab — Horizon Project Tool">
+    <meta property="og:description" content="AI-powered Horizon Europe proposal preparation assistant by Llull Lab.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇪🇺</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* ═══ DESIGN SYSTEM ═══ */
+        :root {
+            /* Diplomatic Gold Palette */
+            --bg-deep: #0d1321;
+            --bg-primary: #101729;
+            --bg-secondary: #141c30;
+            --bg-conv: #181f34;
+            --bg-user-msg: #1c2a4a;
+            --bg-bot-msg: #151d32;
+            --bg-surface: #1a2340;
+
+            --gold: #c9a84c;
+            --gold-bright: #ddc06a;
+            --gold-dim: #8a7434;
+            --gold-glow: rgba(201, 168, 76, 0.15);
+            --copper: #b07d4f;
+            --copper-dim: rgba(176, 125, 79, 0.25);
+
+            --text-primary: #e8e2d6;
+            --text-secondary: #9a9488;
+            --text-muted: #5e5a52;
+            --text-heading: #f0ead8;
+
+            --border: #2a3048;
+            --border-light: #343c56;
+            --border-gold: rgba(201, 168, 76, 0.3);
+
+            --error: #e05454;
+            --success: #5cb88a;
+
+            /* Typography */
+            --font-display: 'Cormorant Garamond', Georgia, serif;
+            --font-body: 'Outfit', system-ui, sans-serif;
+
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-2xl: 48px;
+            --space-3xl: 64px;
+
+            /* Transitions */
+            --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+            --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-deep: #f5f0e8;
+                --bg-primary: #efe9df;
+                --bg-secondary: #e8e2d8;
+                --bg-conv: #f2ece2;
+                --bg-user-msg: #ddd5c7;
+                --bg-bot-msg: #eee8dc;
+                --bg-surface: #e4ddd1;
+
+                --gold: #9a7a28;
+                --gold-bright: #b08e30;
+                --gold-dim: #c9a84c;
+                --gold-glow: rgba(154, 122, 40, 0.12);
+                --copper: #8a5e30;
+                --copper-dim: rgba(138, 94, 48, 0.15);
+
+                --text-primary: #1a1510;
+                --text-secondary: #5a5448;
+                --text-muted: #8a8478;
+                --text-heading: #0d1321;
+
+                --border: #d4cec2;
+                --border-light: #c8c0b2;
+                --border-gold: rgba(154, 122, 40, 0.35);
+
+                --error: #c43a3a;
+                --success: #3a8a5e;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            html { scroll-behavior: auto; }
+        }
+
+        /* ═══ RESET ═══ */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            overflow-x: hidden;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* ═══ SCROLLBAR ═══ */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold-dim);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+
+        /* ═══ SELECTION ═══ */
+        ::selection {
+            background: var(--gold);
+            color: var(--bg-deep);
+        }
+
+        @media (prefers-color-scheme: light) {
+            ::selection {
+                background: var(--gold-dim);
+                color: #faf8f2;
+            }
+        }
+
+        /* ═══ SKIP LINK ═══ */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: var(--space-md);
+            padding: var(--space-sm) var(--space-md);
+            background: var(--gold);
+            color: var(--bg-deep);
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 0 0 8px 8px;
+            z-index: 1000;
+            text-decoration: none;
+            transition: top 0.2s var(--ease-out);
+        }
+        .skip-link:focus {
+            top: 0;
+        }
+
+        /* ═══ HEADER ═══ */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px var(--space-md);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Subtle gold shimmer line at bottom of header */
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--gold-dim) 20%,
+                var(--gold) 50%,
+                var(--gold-dim) 80%,
+                transparent
+            );
+            opacity: 0.5;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        /* Logo: geometric EU-star inspired mark */
+        .logo-mark {
+            width: 42px;
+            height: 42px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .logo-mark::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            animation: logoSpin 20s linear infinite;
+        }
+
+        .logo-mark::after {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            background: conic-gradient(
+                from 0deg,
+                var(--gold) 0deg,
+                transparent 30deg,
+                transparent 60deg,
+                var(--gold) 60deg,
+                transparent 90deg,
+                transparent 120deg,
+                var(--gold) 120deg,
+                transparent 150deg,
+                transparent 180deg,
+                var(--gold) 180deg,
+                transparent 210deg,
+                transparent 240deg,
+                var(--gold) 240deg,
+                transparent 270deg,
+                transparent 300deg,
+                var(--gold) 300deg,
+                transparent 330deg,
+                transparent 360deg
+            );
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: logoSpin 30s linear infinite reverse;
+        }
+
+        @keyframes logoSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        .logo-inner {
+            position: absolute;
+            inset: 12px;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0.9;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .header-title h1 {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--text-heading);
+            line-height: 1.1;
+        }
+
+        .header-title span {
+            font-family: var(--font-body);
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 6px rgba(92, 184, 138, 0.5);
+            animation: statusPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(92, 184, 138, 0.5); }
+            50% { opacity: 0.5; box-shadow: 0 0 2px rgba(92, 184, 138, 0.2); }
+        }
+
+        .header-btn {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--border-gold);
+            background: var(--gold-glow);
+            color: var(--gold-bright);
+            font-family: var(--font-body);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s var(--ease-out), border-color 0.2s var(--ease-out), transform 0.15s var(--ease-out);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .header-btn:hover {
+            background: rgba(201, 168, 76, 0.2);
+            border-color: var(--gold);
+            transform: translateY(-1px);
+        }
+
+        .header-btn:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .header-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .header-btn.visible { display: flex; }
+
+        .header-btn.docx-btn {
+            border-color: rgba(90, 140, 210, 0.35);
+            background: rgba(90, 140, 210, 0.08);
+            color: #7aade6;
+        }
+        .header-btn.docx-btn:hover {
+            background: rgba(90, 140, 210, 0.18);
+            border-color: #7aade6;
+        }
+
+        .header-btn.json-btn {
+            border-color: var(--copper-dim);
+            background: rgba(176, 125, 79, 0.08);
+            color: var(--copper);
+        }
+        .header-btn.json-btn:hover {
+            background: rgba(176, 125, 79, 0.18);
+            border-color: var(--copper);
+        }
+
+        /* ═══ CONVERSATION CONTAINER ═══ */
+        .conv-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-md);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            scroll-behavior: smooth;
+            position: relative;
+        }
+
+        /* Subtle radial glow behind conversation */
+        .conv-container::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 600px;
+            height: 600px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ═══ WELCOME SCREEN ═══ */
+        .welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: var(--space-lg);
+            text-align: center;
+            animation: welcomeIn 1s var(--ease-out);
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes welcomeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* The SÜRPRIZ: Horizon Ring */
+        .horizon-ring {
+            width: 160px;
+            height: 160px;
+            position: relative;
+            margin-bottom: var(--space-md);
+        }
+
+        .horizon-ring-outer {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                var(--gold) 0deg,
+                var(--bg-deep) 40deg,
+                var(--gold-dim) 120deg,
+                var(--bg-deep) 200deg,
+                var(--copper) 280deg,
+                var(--bg-deep) 340deg,
+                var(--gold) 360deg
+            );
+            animation: ringRotate 8s linear infinite;
+            mask: radial-gradient(circle, transparent 58%, black 60%, black 100%);
+            -webkit-mask: radial-gradient(circle, transparent 58%, black 60%, black 100%);
+        }
+
+        .horizon-ring-inner {
+            position: absolute;
+            inset: 20px;
+            border-radius: 50%;
+            border: 1px solid var(--border-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 40% 40%, rgba(201,168,76,0.08), transparent);
+        }
+
+        .horizon-ring-stars {
+            font-size: 36px;
+            line-height: 1;
+            filter: drop-shadow(0 0 8px rgba(201,168,76,0.4));
+        }
+
+        @keyframes ringRotate {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Floating particles around ring */
+        .ring-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat 4s ease-in-out infinite;
+        }
+        .ring-particle:nth-child(2) { top: 10%; left: 80%; animation-delay: 0.8s; }
+        .ring-particle:nth-child(3) { top: 70%; left: 90%; animation-delay: 1.6s; }
+        .ring-particle:nth-child(4) { top: 85%; left: 20%; animation-delay: 2.4s; }
+        .ring-particle:nth-child(5) { top: 15%; left: 10%; animation-delay: 3.2s; }
+
+        @keyframes particleFloat {
+            0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+            50% { opacity: 0.8; transform: translateY(-12px) scale(1); }
+        }
+
+        .welcome h2 {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 700;
+            color: var(--text-heading);
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .welcome h2 em {
+            font-style: italic;
+            color: var(--gold);
+        }
+
+        .welcome p {
+            font-size: 14px;
+            font-weight: 300;
+            color: var(--text-secondary);
+            max-width: 460px;
+            line-height: 1.8;
+        }
+
+        .welcome-hints {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: var(--space-sm);
+        }
+
+        .hint-chip {
+            padding: 10px 20px;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: border-color 0.2s var(--ease-out), color 0.2s var(--ease-out), background 0.2s var(--ease-out), transform 0.15s var(--ease-out);
+            background: transparent;
+            font-family: var(--font-body);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+
+        .hint-chip:hover {
+            border-color: var(--gold);
+            color: var(--gold-bright);
+            background: var(--gold-glow);
+            transform: translateY(-2px);
+        }
+
+        .hint-chip:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .hint-chip.test-chip {
+            border-color: var(--copper-dim);
+            color: var(--copper);
+        }
+        .hint-chip.test-chip:hover {
+            border-color: var(--copper);
+            background: rgba(176, 125, 79, 0.1);
+            color: var(--copper);
+        }
+
+        .welcome-divider {
+            width: 120px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+            margin: var(--space-md) 0;
+        }
+
+        /* ═══ MESSAGES ═══ */
+        .message {
+            display: flex;
+            gap: 14px;
+            max-width: 760px;
+            animation: msgIn 0.4s var(--ease-out);
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user { align-self: flex-end; flex-direction: row-reverse; }
+        .message.bot { align-self: flex-start; }
+
+        .msg-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            font-family: var(--font-display);
+            font-weight: 700;
+        }
+
+        .message.bot .msg-avatar {
+            background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.05));
+            border: 1px solid var(--border-gold);
+            color: var(--gold);
+        }
+
+        .message.user .msg-avatar {
+            background: var(--bg-user-msg);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        .msg-content {
+            padding: 16px 20px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            font-weight: 300;
+        }
+
+        .message.bot .msg-content {
+            background: var(--bg-bot-msg);
+            border: 1px solid var(--border);
+            border-top-left-radius: 4px;
+        }
+
+        .message.user .msg-content {
+            background: var(--bg-user-msg);
+            border: 1px solid rgba(201,168,76,0.12);
+            border-top-right-radius: 4px;
+        }
+
+        /* Message content typography */
+        .msg-content h2, .msg-content h3 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--gold);
+            margin: var(--space-md) 0 var(--space-sm) 0;
+            letter-spacing: 0;
+        }
+        .msg-content h2 { font-size: 16px; }
+        .msg-content h3 { font-size: 14px; }
+        .msg-content h2:first-child, .msg-content h3:first-child { margin-top: 0; }
+
+        .msg-content p { margin: 6px 0; }
+
+        .msg-content strong {
+            color: var(--gold-bright);
+            font-weight: 600;
+        }
+
+        .msg-content em {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .msg-content code {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: rgba(201,168,76,0.1);
+            padding: 2px 7px;
+            border-radius: 4px;
+            color: var(--gold);
+        }
+
+        .msg-content table {
+            border-collapse: collapse;
+            margin: 12px 0;
+            width: 100%;
+        }
+
+        .msg-content th, .msg-content td {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .msg-content th {
+            background: var(--gold-glow);
+            color: var(--gold);
+            font-weight: 600;
+            font-family: var(--font-body);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .msg-content blockquote {
+            border-left: 3px solid var(--gold-dim);
+            padding: 10px 16px;
+            margin: 12px 0;
+            background: rgba(201,168,76,0.04);
+            border-radius: 0 8px 8px 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .msg-content ul, .msg-content ol {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+
+        .msg-content li { margin: 4px 0; }
+
+        .msg-content hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 16px 0;
+        }
+
+        /* ═══ PROPOSAL CARD ═══ */
+        .proposal-card {
+            background: linear-gradient(160deg, rgba(201,168,76,0.06), rgba(176,125,79,0.04), transparent);
+            border: 1px solid var(--border-gold);
+            border-radius: 16px;
+            padding: var(--space-lg);
+            margin-top: var(--space-sm);
+            animation: cardIn 0.6s var(--ease-out);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative corner accent on proposal card */
+        .proposal-card::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(225deg, var(--gold-glow), transparent 70%);
+            pointer-events: none;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .proposal-card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .proposal-card-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.05));
+            border: 1px solid var(--border-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .proposal-card-title h3 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gold-bright);
+            margin: 0 0 4px 0;
+            line-height: 1.2;
+        }
+
+        .proposal-card-title span {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: 0.03em;
+        }
+
+        .proposal-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 10px;
+            margin-bottom: var(--space-lg);
+        }
+
+        .proposal-meta-item {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            transition: border-color 0.2s var(--ease-out);
+        }
+
+        .proposal-meta-item:hover {
+            border-color: var(--border-gold);
+        }
+
+        .proposal-meta-item label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+            font-family: var(--font-body);
+        }
+
+        .proposal-meta-item span {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-heading);
+            font-family: var(--font-display);
+        }
+
+        .proposal-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: var(--space-lg);
+        }
+
+        .proposal-section-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.12);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            transition: border-color 0.2s var(--ease-out), background 0.2s var(--ease-out);
+        }
+
+        .proposal-section-row:hover {
+            border-color: var(--border);
+            background: rgba(0,0,0,0.18);
+        }
+
+        .proposal-section-row .check {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .proposal-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .proposal-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s var(--ease-out), box-shadow 0.2s var(--ease-out), background 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+            border: none;
+            min-height: 44px;
+            letter-spacing: 0.02em;
+        }
+
+        .proposal-action-btn:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .proposal-action-btn.primary {
+            background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+            color: var(--bg-deep);
+        }
+
+        .proposal-action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(201, 168, 76, 0.3);
+        }
+
+        .proposal-action-btn.secondary {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .proposal-action-btn.secondary:hover {
+            border-color: var(--border-gold);
+            color: var(--gold-bright);
+            background: var(--gold-glow);
+        }
+
+        .proposal-action-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ═══ TYPING INDICATOR ═══ */
+        .typing {
+            display: flex;
+            gap: 14px;
+            align-self: flex-start;
+            animation: msgIn 0.3s var(--ease-out);
+            position: relative;
+            z-index: 1;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+            padding: 18px 22px;
+            background: var(--bg-bot-msg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            border-top-left-radius: 4px;
+        }
+
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            background: var(--gold-dim);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ═══ INPUT AREA ═══ */
+        .input-area {
+            padding: var(--space-md);
+            border-top: 1px solid var(--border);
+            background: var(--bg-secondary);
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        /* Gold shimmer on top */
+        .input-area::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(201,168,76,0.2) 30%, rgba(201,168,76,0.1) 70%, transparent);
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .input-field {
+            flex: 1;
+            background: var(--bg-conv);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 20px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 300;
+            color: var(--text-primary);
+            resize: none;
+            outline: none;
+            min-height: 50px;
+            max-height: 160px;
+            line-height: 1.5;
+            transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+        }
+
+        .input-field::placeholder {
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .input-field:focus {
+            border-color: var(--gold-dim);
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.08);
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            border: 1px solid var(--border-gold);
+            background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05));
+            color: var(--gold);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s var(--ease-out), border-color 0.2s var(--ease-out), transform 0.15s var(--ease-out), box-shadow 0.2s var(--ease-out);
+            flex-shrink: 0;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(201,168,76,0.25), rgba(201,168,76,0.1));
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(201, 168, 76, 0.2);
+        }
+
+        .send-btn:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .send-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+
+        .footer-note a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s var(--ease-out);
+        }
+
+        .footer-note a:hover {
+            color: var(--gold);
+        }
+
+        /* ═══ TOASTS ═══ */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 14px 22px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 100;
+            animation: toastIn 0.4s var(--ease-out);
+            display: none;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .error-toast {
+            background: rgba(224, 84, 84, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .success-toast {
+            background: rgba(92, 184, 138, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(20px) translateY(-4px); }
+            to { opacity: 1; transform: translateX(0) translateY(0); }
+        }
+
+        /* ═══ MESSAGE SEPARATOR (ritim) ═══ */
+        .msg-separator {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+            align-self: center;
+            opacity: 0.4;
+        }
+
+        /* ═══ RESPONSIVE — mobile-first ═══ */
+
+        /* Mobile base: welcome hints stack, messages full width */
+        .welcome-hints { flex-direction: column; align-items: center; }
+        .message { max-width: 100%; }
+        .proposal-meta-grid { grid-template-columns: 1fr 1fr; }
+        .proposal-actions { flex-direction: column; }
+        .header-actions { gap: 4px; }
+        .header-btn { padding: 6px 8px; font-size: 10px; }
+        .horizon-ring { width: 120px; height: 120px; }
+
+        @media (min-width: 640px) {
+            .conv-container { padding: var(--space-xl) var(--space-2xl); gap: var(--space-lg); }
+            .welcome-hints { flex-direction: row; }
+            .message { max-width: 760px; }
+            .proposal-meta-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+            .proposal-actions { flex-direction: row; }
+            .header-actions { gap: var(--space-sm); }
+            .header-btn { padding: 7px 14px; font-size: 11px; }
+            .horizon-ring { width: 160px; height: 160px; }
+            .header { padding: var(--space-md) var(--space-xl); }
+            .input-area { padding: var(--space-lg) var(--space-xl); }
+        }
+
+        @media (min-width: 768px) {
+            .header { padding: var(--space-lg) var(--space-2xl); }
+            .input-area { padding: var(--space-lg) var(--space-2xl); }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="#main-conv" class="skip-link">Skip to conversation</a>
+
+    <header class="header" role="banner">
+        <div class="header-left">
+            <div class="logo-mark" aria-hidden="true">
+                <div class="logo-inner"></div>
+            </div>
+            <div class="header-title">
+                <h1>Llull Lab</h1>
+                <span>Horizon Europe Project Assistant</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="header-btn json-btn" id="jsonBtn" onclick="downloadJSON()" aria-label="Download proposal as JSON">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                JSON
+            </button>
+            <button class="header-btn docx-btn" id="docxBtn" onclick="downloadDOCX()" aria-label="Download Part B as DOCX">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                DOCX
+            </button>
+            <button class="header-btn" id="exportBtn" onclick="exportPDF()" aria-label="Export conversation as PDF">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                PDF
+            </button>
+            <div class="status-badge" aria-live="polite">
+                <div class="status-dot" aria-hidden="true"></div>
+                Online
+            </div>
+        </div>
+    </header>
+
+    <main class="conv-container" id="convContainer" role="log" aria-label="Conversation messages" id="main-conv">
+        <div class="welcome" id="welcomeScreen">
+            <div class="horizon-ring" aria-hidden="true">
+                <div class="horizon-ring-outer"></div>
+                <div class="horizon-ring-inner">
+                    <div class="horizon-ring-stars">🇪🇺</div>
+                </div>
+                <div class="ring-particle"></div>
+                <div class="ring-particle"></div>
+                <div class="ring-particle"></div>
+                <div class="ring-particle"></div>
+                <div class="ring-particle"></div>
+            </div>
+            <h2>Your <em>Horizon</em> Begins Here</h2>
+            <p>
+                Prepare your Horizon Europe proposal step by step.
+                Share your project idea and I'll guide you through
+                the full Part B application structure.
+            </p>
+            <div class="welcome-hints">
+                <button class="hint-chip" onclick="sendHint(this)">I have a project idea</button>
+                <button class="hint-chip" onclick="sendHint(this)">Help me find the right call</button>
+                <button class="hint-chip" onclick="sendHint(this)">I need to prepare a RIA proposal</button>
+            </div>
+            <div class="welcome-divider" aria-hidden="true"></div>
+            <div class="welcome-hints">
+                <button class="hint-chip test-chip" onclick="simulateProposal()">⚡ Test: Simulate Proposal Output</button>
+            </div>
+        </div>
+    </main>
+
+    <div class="input-area">
+        <div class="input-wrapper">
+            <label for="messageInput" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Type your message</label>
+            <textarea
+                class="input-field"
+                id="messageInput"
+                placeholder="Describe your project idea..."
+                rows="1"
+                onkeydown="handleKey(event)"
+                oninput="autoResize(this)"
+                aria-label="Message input"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send message">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+        <div class="footer-note">
+            Built by <a href="https://www.llulllab.eu" target="_blank" rel="noopener noreferrer">Llull Lab</a> · Paris
+        </div>
+    </div>
+
+    <div class="toast error-toast" id="errorToast" role="alert"></div>
+    <div class="toast success-toast" id="successToast" role="status"></div>
+
+    <script>
+    'use strict';
+
+    (function() {
+        // ── Configuration ──
+        const CONFIG = {
+            webhookUrl: 'https://n8n.tropus.io/webhook/horizon',
+            sessionId: 'session-' + Math.random().toString(36).substr(2, 9),
+            apiKey: ''
+        };
+
+        // ── State ──
+        let isWaiting = false;
+        let lastBotRaw = '';
+        let botMessageCount = 0;
+        let lastProposalData = null;
+        let lastDocxBase64 = null;
+        let lastDocxFilename = null;
+        let lastMsgType = null;
+
+        // ── Expose functions to HTML onclick ──
+        window.sendHint = sendHint;
+        window.sendMessage = sendMessage;
+        window.handleKey = handleKey;
+        window.autoResize = autoResize;
+        window.simulateProposal = simulateProposal;
+        window.downloadDOCX = downloadDOCX;
+        window.downloadJSON = downloadJSON;
+        window.exportPDF = exportPDF;
+
+        // ── TEST MODE: Simulate a proposal response ──
+        function simulateProposal() {
+            const welcome = document.getElementById('welcomeScreen');
+            if (welcome) welcome.remove();
+
+            const fakeProposal = {
+                proposal_ready: true,
+                metadata: {
+                    project_title: "Smart Urban Green Infrastructure for Climate Resilience",
+                    acronym: "SUGICR",
+                    call_identifier: "HORIZON-CL6-2025-BIODIV-01-01",
+                    action_type: "RIA",
+                    duration_months: 48,
+                    total_budget_eur: 4500000,
+                    eu_contribution_eur: 4500000,
+                    trl_start: 3,
+                    trl_target: 6
+                },
+                section_1_excellence: {
+                    s1_1_objectives_and_ambition: "The SUGICR project aims to develop and validate an integrated framework for smart urban green infrastructure (UGI) that enhances climate resilience in European cities.\n\nSpecific objectives:\n(1) Develop a digital twin platform for urban green infrastructure.\n(2) Create AI-driven decision support tools for optimal UGI placement.\n(3) Validate the framework in 5 pilot cities across different European climate zones.\n(4) Establish standardised metrics for measuring UGI effectiveness.\n(5) Build capacity among urban planners for evidence-based UGI decisions.",
+                    s1_2_relation_to_work_programme: "SUGICR directly addresses the Horizon Europe Work Programme Cluster 6 priorities on biodiversity and ecosystem services in urban environments. The project aligns with the European Green Deal objectives and the EU Biodiversity Strategy for 2030.",
+                    s1_3_concept_and_methodology: "The project employs a multi-disciplinary approach combining remote sensing, IoT sensor networks, machine learning, and participatory urban planning methodologies.",
+                    s1_4_interdisciplinary_considerations: "SUGICR brings together expertise from environmental science, urban planning, computer science, social science, and public health."
+                },
+                section_2_impact: {
+                    s2_1_pathways_towards_impact: "The project creates impact through three main pathways: (1) Scientific advancement, (2) Technological innovation through the digital twin platform, (3) Policy influence through evidence-based guidelines.",
+                    s2_2_dissemination_exploitation_communication: "A comprehensive dissemination strategy includes peer-reviewed publications (target: 25+), conference presentations, policy briefs, open-source software releases, and stakeholder workshops.",
+                    s2_3_impact_indicators: [
+                        { indicator: "Peer-reviewed publications", target: "25+", measurement: "Publication count in indexed journals" },
+                        { indicator: "Cities adopting framework", target: "15 by 2030", measurement: "MoU signatures" },
+                        { indicator: "Urban green coverage increase", target: "8% in pilot cities", measurement: "Satellite imagery analysis" },
+                        { indicator: "Policy briefs produced", target: "10", measurement: "Document count" }
+                    ]
+                },
+                section_3_implementation: {
+                    s3_1_work_packages: [
+                        { wp_number: 1, title: "Project Management", lead_partner: "TU Berlin", person_months: 36, start_month: 1, end_month: 48, description: "Overall project coordination and reporting.", tasks: [{ task_id: "T1.1", title: "Coordination", description: "Day-to-day management" }] },
+                        { wp_number: 2, title: "Data Collection", lead_partner: "CNRS", person_months: 48, start_month: 1, end_month: 18, description: "Data collection across pilot cities.", tasks: [{ task_id: "T2.1", title: "Remote sensing", description: "Satellite imagery collection" }] },
+                        { wp_number: 3, title: "Digital Twin Platform", lead_partner: "Fraunhofer IGD", person_months: 60, start_month: 6, end_month: 36, description: "Core digital twin platform development.", tasks: [{ task_id: "T3.1", title: "Platform dev", description: "Backend and frontend" }] },
+                        { wp_number: 4, title: "AI Decision Tools", lead_partner: "ETH Zurich", person_months: 42, start_month: 12, end_month: 42, description: "ML model development for UGI optimization.", tasks: [{ task_id: "T4.1", title: "ML models", description: "Training and validation" }] },
+                        { wp_number: 5, title: "Pilot Validation", lead_partner: "City of Barcelona", person_months: 36, start_month: 24, end_month: 46, description: "Validation in Berlin, Barcelona, Amsterdam, Vienna, Lisbon.", tasks: [{ task_id: "T5.1", title: "Deployment", description: "Testing in pilot cities" }] },
+                        { wp_number: 6, title: "Dissemination", lead_partner: "ICLEI Europe", person_months: 24, start_month: 1, end_month: 48, description: "Knowledge dissemination and sustainability planning.", tasks: [{ task_id: "T6.1", title: "Publications", description: "Papers and conferences" }] }
+                    ],
+                    s3_2_consortium: {
+                        coordinator: { name: "TU Berlin", country: "Germany", type: "University", role: "Coordination, WP1 lead" },
+                        partners: [
+                            { name: "CNRS", country: "France", type: "Research Org", role: "WP2 lead, data science", person_months: 48, budget_eur: 650000 },
+                            { name: "Fraunhofer IGD", country: "Germany", type: "Research Org", role: "WP3 lead, digital twin", person_months: 60, budget_eur: 850000 },
+                            { name: "ETH Zurich", country: "Switzerland", type: "University", role: "WP4 lead, AI/ML", person_months: 42, budget_eur: 600000 },
+                            { name: "City of Barcelona", country: "Spain", type: "Public Authority", role: "WP5 lead, pilots", person_months: 30, budget_eur: 400000 },
+                            { name: "ICLEI Europe", country: "Germany", type: "Non-profit", role: "WP6 lead, dissemination", person_months: 24, budget_eur: 350000 }
+                        ],
+                        consortium_added_value: "The consortium combines world-class research institutions with practical urban implementation expertise."
+                    },
+                    s3_3_milestones: [
+                        { id: "MS1", title: "Baseline complete", related_wp: "WP2", due_month: 18, verification_means: "Report approved" },
+                        { id: "MS2", title: "Platform v1.0", related_wp: "WP3", due_month: 30, verification_means: "Platform online" },
+                        { id: "MS3", title: "AI models validated", related_wp: "WP4", due_month: 36, verification_means: "Accuracy >85%" },
+                        { id: "MS4", title: "Pilots complete", related_wp: "WP5", due_month: 42, verification_means: "City reports" },
+                        { id: "MS5", title: "Framework published", related_wp: "WP6", due_month: 48, verification_means: "Published online" }
+                    ],
+                    s3_4_deliverables: [
+                        { id: "D2.1", title: "Baseline Report", related_wp: "WP2", due_month: 18, type: "Report", dissemination_level: "Public" },
+                        { id: "D3.1", title: "Digital Twin v1.0", related_wp: "WP3", due_month: 30, type: "Software", dissemination_level: "Public" },
+                        { id: "D4.1", title: "AI Tools", related_wp: "WP4", due_month: 36, type: "Software", dissemination_level: "Public" },
+                        { id: "D5.1", title: "Pilot Report", related_wp: "WP5", due_month: 44, type: "Report", dissemination_level: "Public" },
+                        { id: "D6.1", title: "UGI Guidelines", related_wp: "WP6", due_month: 48, type: "Report", dissemination_level: "Public" }
+                    ],
+                    s3_5_budget_summary: {
+                        personnel_costs: 2800000,
+                        subcontracting: 200000,
+                        travel_costs: 300000,
+                        equipment: 350000,
+                        other_direct_costs: 250000,
+                        indirect_costs: 600000
+                    }
+                },
+                part_a_admin: {
+                    abstract: "SUGICR develops an integrated smart urban green infrastructure framework combining digital twin technology, AI-driven decision support, and participatory planning to enhance climate resilience in European cities.",
+                    keywords: ["urban green infrastructure", "climate resilience", "digital twin", "AI", "urban planning"],
+                    panels: ["ENV", "ICT"]
+                }
+            };
+
+            lastProposalData = fakeProposal;
+            lastDocxFilename = 'SUGICR_PartB_Draft.docx';
+            lastDocxBase64 = null;
+
+            document.getElementById('docxBtn').classList.add('visible');
+            document.getElementById('jsonBtn').classList.add('visible');
+
+            addMessage(
+                'Your Horizon Europe proposal draft for **Smart Urban Green Infrastructure for Climate Resilience** (SUGICR) has been generated successfully. The structured data and the Part B document are ready for download.',
+                'bot',
+                fakeProposal
+            );
+
+            showSuccess('Test proposal simulated. Try the download buttons.');
+        }
+
+        // ── Send hint chip ──
+        function sendHint(el) {
+            document.getElementById('messageInput').value = el.textContent;
+            sendMessage();
+        }
+
+        // ── Keyboard handler ──
+        function handleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // ── Auto-resize textarea ──
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+        }
+
+        // ── Markdown-lite parser ──
+        function parseMarkdown(text) {
+            if (!text) return '';
+            text = text.replace(/^=/, '').trim();
+
+            let html = text
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                .replace(/^---$/gm, '<hr>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+
+            // Tables
+            if (html.includes('|')) {
+                html = html.replace(/((?:\|.+\|\n?)+)/g, function(match) {
+                    var rows = match.trim().split('\n').filter(function(r) { return !r.match(/^\|[\s\-:|]+\|$/); });
+                    if (rows.length < 1) return match;
+                    var table = '<table>';
+                    rows.forEach(function(row, i) {
+                        var cells = row.split('|').filter(function(c) { return c.trim(); });
+                        var tag = i === 0 ? 'th' : 'td';
+                        table += '<tr>' + cells.map(function(c) { return '<' + tag + '>' + c.trim() + '</' + tag + '>'; }).join('') + '</tr>';
+                    });
+                    table += '</table>';
+                    return table;
+                });
+            }
+
+            html = html.replace(/\n\n/g, '</p><p>');
+            html = '<p>' + html + '</p>';
+            html = html.replace(/<p>\s*<(h[23]|hr|table|blockquote)/g, '<$1');
+            html = html.replace(/<\/(h[23]|hr|table|blockquote)>\s*<\/p>/g, '</$1>');
+            html = html.replace(/<p><\/p>/g, '');
+            html = html.replace(/\n/g, '<br>');
+
+            return html;
+        }
+
+        // ── Format number ──
+        function fmtNum(n) {
+            return Number(n || 0).toLocaleString('en-US');
+        }
+
+        // ── Build proposal card ──
+        function buildProposalCard(data) {
+            var m = data.metadata || {};
+            var s1 = data.section_1_excellence || {};
+            var s2 = data.section_2_impact || {};
+            var s3 = data.section_3_implementation || {};
+            var wpCount = (s3.s3_1_work_packages || []).length;
+            var partnerCount = (s3.s3_2_consortium?.partners || []).length + (s3.s3_2_consortium?.coordinator ? 1 : 0);
+            var msCount = (s3.s3_3_milestones || []).length;
+            var dlCount = (s3.s3_4_deliverables || []).length;
+
+            return '<div class="proposal-card">' +
+                '<div class="proposal-card-header">' +
+                    '<div class="proposal-card-icon" aria-hidden="true">📋</div>' +
+                    '<div class="proposal-card-title">' +
+                        '<h3>' + (m.project_title || 'Proposal Draft') + '</h3>' +
+                        '<span>' + (m.acronym || '') + ' &middot; ' + (m.call_identifier || '') + ' &middot; ' + (m.action_type || 'RIA') + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="proposal-meta-grid">' +
+                    '<div class="proposal-meta-item"><label>Duration</label><span>' + (m.duration_months || '—') + ' months</span></div>' +
+                    '<div class="proposal-meta-item"><label>TRL Range</label><span>TRL ' + (m.trl_start || '?') + ' → TRL ' + (m.trl_target || '?') + '</span></div>' +
+                    '<div class="proposal-meta-item"><label>Total Budget</label><span>€ ' + fmtNum(m.total_budget_eur) + '</span></div>' +
+                    '<div class="proposal-meta-item"><label>EU Contribution</label><span>€ ' + fmtNum(m.eu_contribution_eur) + '</span></div>' +
+                '</div>' +
+                '<div class="proposal-sections">' +
+                    '<div class="proposal-section-row"><span class="check" aria-hidden="true">✓</span> Section 1 — Excellence (' + (s1.s1_1_objectives_and_ambition ? 'complete' : 'empty') + ')</div>' +
+                    '<div class="proposal-section-row"><span class="check" aria-hidden="true">✓</span> Section 2 — Impact (' + (s2.s2_1_pathways_towards_impact ? 'complete' : 'empty') + ')</div>' +
+                    '<div class="proposal-section-row"><span class="check" aria-hidden="true">✓</span> Section 3 — Implementation (' + wpCount + ' WPs, ' + partnerCount + ' partners, ' + msCount + ' milestones, ' + dlCount + ' deliverables)</div>' +
+                '</div>' +
+                '<div class="proposal-actions">' +
+                    '<button class="proposal-action-btn primary" onclick="downloadDOCX()">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>' +
+                        'Download Part B (DOCX)' +
+                    '</button>' +
+                    '<button class="proposal-action-btn secondary" onclick="downloadJSON()">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' +
+                        'Download JSON' +
+                    '</button>' +
+                    '<button class="proposal-action-btn secondary" onclick="exportPDF()">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' +
+                        'Export Conversation PDF' +
+                    '</button>' +
+                '</div>' +
+            '</div>';
+        }
+
+        // ── Add message to conversation ──
+        function addMessage(content, type, proposalData) {
+            var welcome = document.getElementById('welcomeScreen');
+            if (welcome) welcome.remove();
+
+            var container = document.getElementById('convContainer');
+
+            // Add separator between messages for rhythm
+            if (lastMsgType && lastMsgType !== type) {
+                var sep = document.createElement('div');
+                sep.className = 'msg-separator';
+                sep.setAttribute('aria-hidden', 'true');
+                container.appendChild(sep);
+            }
+
+            var msg = document.createElement('div');
+            msg.className = 'message ' + type;
+
+            var avatarContent = type === 'bot' ? 'H' : '→';
+            var parsedContent;
+
+            if (type === 'bot') {
+                parsedContent = parseMarkdown(content);
+                if (proposalData) {
+                    parsedContent += buildProposalCard(proposalData);
+                }
+            } else {
+                parsedContent = '<p>' + content + '</p>';
+            }
+
+            msg.innerHTML =
+                '<div class="msg-avatar" aria-hidden="true">' + avatarContent + '</div>' +
+                '<div class="msg-content">' + parsedContent + '</div>';
+
+            container.appendChild(msg);
+            container.scrollTop = container.scrollHeight;
+
+            lastMsgType = type;
+
+            if (type === 'bot') {
+                lastBotRaw = content;
+                botMessageCount++;
+                document.getElementById('exportBtn').classList.add('visible');
+            }
+        }
+
+        // ── Typing indicator ──
+        function showTyping() {
+            var container = document.getElementById('convContainer');
+            var typing = document.createElement('div');
+            typing.className = 'typing';
+            typing.id = 'typingIndicator';
+            typing.innerHTML =
+                '<div class="msg-avatar" style="background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.05));border:1px solid var(--border-gold);color:var(--gold);font-family:var(--font-display);font-weight:700;" aria-hidden="true">H</div>' +
+                '<div class="typing-dots" aria-label="Assistant is typing"><span></span><span></span><span></span></div>';
+            container.appendChild(typing);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function hideTyping() {
+            var el = document.getElementById('typingIndicator');
+            if (el) el.remove();
+        }
+
+        // ── Toasts ──
+        function showError(msg) {
+            var toast = document.getElementById('errorToast');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(function() { toast.style.display = 'none'; }, 4000);
+        }
+
+        function showSuccess(msg) {
+            var toast = document.getElementById('successToast');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(function() { toast.style.display = 'none'; }, 3000);
+        }
+
+        // ── Send message ──
+        async function sendMessage() {
+            var input = document.getElementById('messageInput');
+            if (!input) return;
+            var text = input.value.trim();
+            if (!text || isWaiting) return;
+
+            addMessage(text, 'user');
+            input.value = '';
+            input.style.height = 'auto';
+            isWaiting = true;
+            var sendBtn = document.getElementById('sendBtn');
+            if (sendBtn) sendBtn.disabled = true;
+            showTyping();
+
+            try {
+                var headers = { 'Content-Type': 'application/json' };
+                if (CONFIG.apiKey) {
+                    headers['x-api-key'] = CONFIG.apiKey;
+                }
+
+                var res = await fetch(CONFIG.webhookUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        message: text,
+                        session_id: CONFIG.sessionId
+                    })
+                });
+
+                hideTyping();
+
+                if (!res.ok) throw new Error('Server error (' + res.status + ')');
+
+                var rawText = await res.text();
+                var data;
+                try {
+                    data = JSON.parse(rawText);
+                } catch (e) {
+                    data = null;
+                }
+
+                if (data && data.type === 'proposal_complete') {
+                    lastProposalData = data.proposal_json;
+                    lastDocxBase64 = data.docx_base64;
+                    lastDocxFilename = data.filename || 'Horizon_PartB_Draft.docx';
+                    document.getElementById('docxBtn').classList.add('visible');
+                    document.getElementById('jsonBtn').classList.add('visible');
+                    var msg = data.message || 'Your proposal draft is ready. You can download the Part B document below.';
+                    addMessage(msg, 'bot', lastProposalData);
+                } else if (data && data.proposal_json && !data.docx_base64) {
+                    lastProposalData = data.proposal_json;
+                    document.getElementById('jsonBtn').classList.add('visible');
+                    var msg2 = data.message || data.conversation_text || 'Your structured proposal data is ready.';
+                    addMessage(msg2, 'bot', lastProposalData);
+                } else if (data && data.conversation_text) {
+                    addMessage(data.conversation_text, 'bot');
+                } else {
+                    addMessage(rawText, 'bot');
+                }
+
+            } catch (err) {
+                hideTyping();
+                showError('Connection failed. Please try again.');
+                console.error(err);
+            } finally {
+                isWaiting = false;
+                if (sendBtn) sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+
+        // ── Download DOCX ──
+        function downloadDOCX() {
+            if (!lastDocxBase64) {
+                showError('No proposal document available yet. Complete the conversation first.');
+                return;
+            }
+            try {
+                var byteChars = atob(lastDocxBase64);
+                var byteNumbers = new Array(byteChars.length);
+                for (var i = 0; i < byteChars.length; i++) {
+                    byteNumbers[i] = byteChars.charCodeAt(i);
+                }
+                var byteArray = new Uint8Array(byteNumbers);
+                var blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = lastDocxFilename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+                showSuccess('Part B document downloaded successfully.');
+            } catch (err) {
+                console.error('DOCX download error:', err);
+                showError('Failed to download DOCX. Please try again.');
+            }
+        }
+
+        // ── Download JSON ──
+        function downloadJSON() {
+            if (!lastProposalData) {
+                showError('No proposal data available yet. Complete the conversation first.');
+                return;
+            }
+            try {
+                var jsonStr = JSON.stringify(lastProposalData, null, 2);
+                var blob = new Blob([jsonStr], { type: 'application/json' });
+                var acronym = lastProposalData.metadata?.acronym || 'proposal';
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = acronym + '_proposal_data.json';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+                showSuccess('Proposal JSON downloaded successfully.');
+            } catch (err) {
+                console.error('JSON download error:', err);
+                showError('Failed to download JSON. Please try again.');
+            }
+        }
+
+        // ── Export Conversation as PDF ──
+        function exportPDF() {
+            var container = document.getElementById('convContainer');
+            if (!container) return;
+            var allBotMessagesContent = container.querySelectorAll('.message.bot .msg-content');
+
+            var allContentHTML = '';
+            if (allBotMessagesContent.length === 0) {
+                showError('No assistant messages to export yet.');
+                return;
+            }
+
+            allBotMessagesContent.forEach(function(contentEl) {
+                var clonedContent = contentEl.cloneNode(true);
+                var cards = clonedContent.querySelectorAll('.proposal-card');
+                cards.forEach(function(card) { card.remove(); });
+                clonedContent.removeAttribute('style');
+                clonedContent.removeAttribute('class');
+
+                var styledContent = clonedContent.innerHTML
+                    .replace(/<h2[^>]*>/g, '<h2 style="font-family:\'Cormorant Garamond\',serif;font-size:14pt;color:#8a7434;margin:24px 0 10px 0;padding-bottom:4px;border-bottom:1px solid #e0d8c8;">')
+                    .replace(/<h3[^>]*>/g, '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:12pt;color:#8a7434;margin:18px 0 8px 0;">')
+                    .replace(/<strong[^>]*>/g, '<strong style="color:#0d1321;">')
+                    .replace(/<em[^>]*>/g, '<em style="color:#555; font-style: italic;">')
+                    .replace(/<blockquote[^>]*>/g, '<blockquote style="border-left:3px solid #c9a84c;padding:8px 14px;margin:10px 0;background:#faf8f2;color:#555;">')
+                    .replace(/<th[^>]*>/g, '<th style="background:#f5f0e0;color:#8a7434;font-weight:600;border:1px solid #ddd;padding:8px 10px;font-size:10pt;text-align:left;">')
+                    .replace(/<td[^>]*>/g, '<td style="border:1px solid #ddd;padding:8px 10px;font-size:10pt;text-align:left;">')
+                    .replace(/<table[^>]*>/g, '<table style="border-collapse:collapse;width:100%;margin:12px 0;">')
+                    .replace(/<code[^>]*>/g, '<code style="font-family:monospace;font-size:9pt;background:#f5f0e0;padding:2px 6px;border-radius:3px;color:#8a7434;">')
+                    .replace(/<p[^>]*>/g, '<p style="margin:6px 0;color:#333;">')
+                    .replace(/<hr[^>]*>/g, '<hr style="border:none;border-top:1px solid #e0d8c8;margin:16px 0;">');
+
+                allContentHTML += styledContent;
+            });
+
+            var now = new Date();
+            var dateStr = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+
+            var tempDiv = document.createElement('div');
+            tempDiv.id = 'pdfTempExport';
+            tempDiv.style.cssText = 'position:absolute;left:-9999px;top:0;width:794px;background:#ffffff;color:#0d1321;font-family:"Outfit",sans-serif;font-size:11pt;line-height:1.6;padding:40px;';
+
+            tempDiv.innerHTML =
+                '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #c9a84c;padding-bottom:16px;margin-bottom:28px;">' +
+                    '<div>' +
+                        '<h1 style="font-family:\'Cormorant Garamond\',serif;font-size:16pt;color:#0d1321;letter-spacing:0.02em;margin:0;">LLULL LAB</h1>' +
+                        '<div style="font-size:10pt;color:#666;margin-top:4px;">Horizon Europe — Conversation Log</div>' +
+                    '</div>' +
+                    '<div style="font-size:9pt;color:#888;text-align:right;">' +
+                        'Generated: ' + dateStr + '<br>' +
+                        'Session: ' + CONFIG.sessionId +
+                    '</div>' +
+                '</div>' +
+                allContentHTML +
+                '<div style="margin-top:32px;padding-top:12px;border-top:1px solid #e0d8c8;font-size:8pt;color:#aaa;text-align:center;">' +
+                    'This document was generated by the Llull Lab Horizon Project Tool. It is a conversation log and should be reviewed before use.' +
+                '</div>';
+
+            document.body.appendChild(tempDiv);
+
+            setTimeout(function() {
+                if (typeof html2pdf === 'undefined') {
+                    document.body.removeChild(tempDiv);
+                    showError('PDF export library not loaded.');
+                    return;
+                }
+                html2pdf().set({
+                    margin: [15, 15, 20, 15],
+                    filename: 'Horizon_Log_' + now.toISOString().slice(0,10) + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        windowWidth: 794
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                }).from(tempDiv).save().then(function() {
+                    document.body.removeChild(tempDiv);
+                }).catch(function(err) {
+                    console.error('PDF export error:', err);
+                    if (document.body.contains(tempDiv)) document.body.removeChild(tempDiv);
+                    showError('PDF export failed. Check console for details.');
+                });
+            }, 50);
+        }
+
+    })();
+    </script>
+
+</body>
+</html>
