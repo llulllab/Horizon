@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Llull Lab — Horizon Access</title>
+<meta name="description" content="Enter your invitation code to access the Horizon Europe Project Assistant by Llull Lab.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇪🇺</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,300;1,6..72,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg-abyss:#0a1410;
+  --bg-primary:#0e1a14;
+  --bg-secondary:#121e18;
+  --bg-surface:#1a2c22;
+  --bg-glow:rgba(10,20,16,0.90);
+
+  --copper:#c47a4a;
+  --copper-bright:#da9462;
+  --copper-dim:#8a5430;
+  --copper-glow:rgba(196,122,74,0.12);
+  --copper-ghost:rgba(196,122,74,0.06);
+
+  --teal:#5a9a8a;
+  --teal-dim:rgba(90,154,138,0.12);
+  --teal-ghost:rgba(90,154,138,0.06);
+
+  --text-1:#dce8e0;
+  --text-2:#8a9e90;
+  --text-3:#7a9488;
+  --text-heading:#e8f0ea;
+
+  --error:#c45454;
+  --success:#5ab87a;
+
+  --border:rgba(90,154,138,0.10);
+  --border-light:rgba(90,154,138,0.18);
+  --border-copper:rgba(196,122,74,0.25);
+
+  --font-display:'Newsreader',Georgia,serif;
+  --font-body:'Outfit',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','Courier New',monospace;
+
+  --ease-out:cubic-bezier(0.22,1,0.36,1);
+  --ease-bounce:cubic-bezier(0.34,1.56,0.64,1);
+}
+
+[data-theme="light"]{
+  --bg-abyss:#f2ede4;
+  --bg-primary:#ece6dc;
+  --bg-secondary:#e4ded4;
+  --bg-surface:#dcd6ca;
+  --bg-glow:rgba(242,237,228,0.90);
+  --copper:#7a4a20;
+  --copper-bright:#5a3410;
+  --copper-dim:#c47a4a;
+  --copper-glow:rgba(122,74,32,0.08);
+  --copper-ghost:rgba(122,74,32,0.04);
+  --teal:#2a6a5a;
+  --teal-dim:rgba(42,106,90,0.08);
+  --teal-ghost:rgba(42,106,90,0.04);
+  --text-1:#141e18;
+  --text-2:#4a5e50;
+  --text-3:#4a5c50;
+  --text-heading:#0a1410;
+  --error:#a03030;
+  --success:#2a7a4a;
+  --border:rgba(42,106,90,0.12);
+  --border-light:rgba(42,106,90,0.20);
+  --border-copper:rgba(122,74,32,0.30);
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
+}
+
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+body{
+  font-family:var(--font-body);background:var(--bg-abyss);color:var(--text-1);
+  height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;font-size:16px;line-height:1.6;position:relative;
+}
+
+::selection{background:rgba(196,122,74,0.25);color:var(--text-heading)}
+
+/* ═══ AMBIENT BACKGROUND ═══ */
+.ambient{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+}
+.ambient::before{
+  content:'';position:absolute;top:30%;left:50%;width:800px;height:800px;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(196,122,74,0.06) 0%,transparent 60%);
+}
+.ambient::after{
+  content:'';position:absolute;bottom:20%;left:50%;width:600px;height:600px;
+  transform:translate(-50%,0);
+  background:radial-gradient(circle,rgba(90,154,138,0.04) 0%,transparent 60%);
+}
+
+/* ═══ MAIN CONTAINER ═══ */
+.gate{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;
+  max-width:460px;width:100%;padding:0 24px;
+  animation:gateIn 0.8s var(--ease-out);
+}
+@keyframes gateIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ HORIZON RING (reused from index.html) ═══ */
+.horizon-ring{width:100px;height:100px;position:relative;margin-bottom:28px}
+.horizon-ring-outer{
+  position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(
+    from 0deg,var(--copper) 0deg,var(--bg-abyss) 40deg,
+    var(--teal) 120deg,var(--bg-abyss) 200deg,
+    var(--copper) 280deg,var(--bg-abyss) 340deg,var(--copper) 360deg
+  );
+  animation:ringRotate 8s linear infinite;
+  mask:radial-gradient(circle,transparent 58%,black 60%,black 100%);
+  -webkit-mask:radial-gradient(circle,transparent 58%,black 60%,black 100%);
+}
+.horizon-ring-inner{
+  position:absolute;inset:15px;border-radius:50%;
+  border:1px solid var(--border-copper);
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 40% 40%,rgba(196,122,74,0.06),transparent);
+}
+.horizon-ring-stars{font-size:26px;line-height:1;filter:drop-shadow(0 0 8px rgba(196,122,74,0.3))}
+@keyframes ringRotate{to{transform:rotate(360deg)}}
+
+.ring-particle{
+  position:absolute;width:3px;height:3px;background:var(--copper);
+  border-radius:50%;opacity:0;animation:particleFloat 4s ease-in-out infinite;
+}
+.ring-particle:nth-child(2){top:10%;left:80%;animation-delay:0.8s}
+.ring-particle:nth-child(3){top:70%;left:90%;animation-delay:1.6s}
+.ring-particle:nth-child(4){top:85%;left:20%;animation-delay:2.4s}
+@keyframes particleFloat{
+  0%,100%{opacity:0;transform:translateY(0) scale(0.5)}
+  50%{opacity:0.7;transform:translateY(-12px) scale(1)}
+}
+
+/* ═══ TITLE ═══ */
+.gate-title{
+  font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2rem);
+  font-weight:600;color:var(--text-heading);text-align:center;
+  letter-spacing:-0.02em;line-height:1.15;margin-bottom:8px;
+}
+.gate-title em{font-style:italic;color:var(--copper)}
+
+.gate-subtitle{
+  font-size:14px;font-weight:300;color:var(--text-2);
+  text-align:center;max-width:360px;line-height:1.7;margin-bottom:36px;
+}
+
+/* ═══ CODE INPUT AREA ═══ */
+.code-section{width:100%;margin-bottom:24px}
+
+.code-label{
+  font-family:var(--font-mono);font-size:11px;font-weight:500;
+  color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;
+  margin-bottom:10px;display:block;
+}
+
+.code-input-row{display:flex;gap:8px;align-items:stretch}
+
+.code-input{
+  flex:1;background:var(--bg-secondary);
+  border:1px solid var(--border);border-radius:8px;
+  padding:14px 16px;font-family:var(--font-mono);font-size:16px;
+  font-weight:500;color:var(--text-heading);letter-spacing:0.12em;
+  text-transform:uppercase;outline:none;
+  transition:border-color 0.25s var(--ease-out),box-shadow 0.25s var(--ease-out);
+  caret-color:var(--copper);
+}
+.code-input::placeholder{
+  color:var(--text-3);font-weight:300;letter-spacing:0.06em;
+  text-transform:none;font-size:13px;
+}
+.code-input:focus{
+  border-color:var(--copper-dim);
+  box-shadow:0 0 0 3px var(--copper-ghost),0 4px 24px rgba(196,122,74,0.06);
+}
+
+.code-submit{
+  padding:0 24px;border-radius:8px;
+  border:1px solid var(--border-copper);
+  background:linear-gradient(135deg,rgba(196,122,74,0.14),rgba(90,154,138,0.06));
+  color:var(--copper);cursor:pointer;
+  font-family:var(--font-mono);font-size:12px;font-weight:500;
+  letter-spacing:0.06em;text-transform:uppercase;
+  transition:background 0.25s var(--ease-out),border-color 0.25s var(--ease-out),transform 0.15s var(--ease-out),box-shadow 0.3s var(--ease-out);
+  min-height:50px;min-width:44px;white-space:nowrap;
+}
+.code-submit:hover:not(:disabled){
+  background:linear-gradient(135deg,rgba(196,122,74,0.25),rgba(90,154,138,0.10));
+  border-color:var(--copper);transform:translateY(-1px);
+  box-shadow:0 4px 16px rgba(196,122,74,0.15);
+}
+.code-submit:active:not(:disabled){transform:scale(0.97)}
+.code-submit:disabled{opacity:0.35;cursor:not-allowed}
+
+/* ═══ STATUS MESSAGE ═══ */
+.status-msg{
+  width:100%;text-align:center;min-height:20px;
+  font-family:var(--font-mono);font-size:12px;font-weight:400;
+  margin-bottom:24px;transition:color 0.2s;
+}
+.status-msg.error{color:var(--error)}
+.status-msg.success{color:var(--success)}
+.status-msg.loading{color:var(--text-3)}
+
+/* ═══ DIVIDER ═══ */
+.divider{
+  width:100%;display:flex;align-items:center;gap:16px;margin-bottom:24px;
+}
+.divider-line{
+  flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border-light),transparent);
+}
+.divider-text{
+  font-family:var(--font-mono);font-size:10px;font-weight:400;
+  color:var(--text-3);letter-spacing:0.1em;text-transform:uppercase;
+  white-space:nowrap;
+}
+
+/* ═══ REQUEST ACCESS SECTION ═══ */
+.request-section{width:100%}
+
+.request-toggle{
+  width:100%;background:transparent;border:1px solid var(--border);
+  border-radius:8px;padding:14px 20px;cursor:pointer;
+  font-family:var(--font-body);font-size:13px;font-weight:400;
+  color:var(--text-2);text-align:center;
+  transition:border-color 0.25s var(--ease-out),color 0.25s var(--ease-out),background 0.25s var(--ease-out);
+}
+.request-toggle:hover{
+  border-color:var(--teal-dim);color:var(--teal);background:var(--teal-ghost);
+}
+
+.request-form{
+  display:none;flex-direction:column;gap:10px;
+  animation:formIn 0.4s var(--ease-out);
+}
+.request-form.visible{display:flex}
+@keyframes formIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.email-input{
+  width:100%;background:var(--bg-secondary);
+  border:1px solid var(--border);border-radius:8px;
+  padding:14px 16px;font-family:var(--font-body);font-size:14px;
+  font-weight:400;color:var(--text-1);outline:none;
+  transition:border-color 0.25s var(--ease-out),box-shadow 0.25s var(--ease-out);
+  caret-color:var(--teal);
+}
+.email-input::placeholder{color:var(--text-3);font-weight:300}
+.email-input:focus{
+  border-color:var(--teal);
+  box-shadow:0 0 0 3px var(--teal-ghost);
+}
+
+.email-submit{
+  width:100%;padding:14px 20px;border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--teal-ghost);color:var(--teal);
+  cursor:pointer;font-family:var(--font-body);font-size:13px;
+  font-weight:500;letter-spacing:0.02em;
+  transition:background 0.25s var(--ease-out),border-color 0.25s var(--ease-out),transform 0.15s var(--ease-out);
+}
+.email-submit:hover:not(:disabled){
+  background:rgba(90,154,138,0.12);border-color:var(--teal);transform:translateY(-1px);
+}
+.email-submit:active:not(:disabled){transform:scale(0.98)}
+.email-submit:disabled{opacity:0.35;cursor:not-allowed}
+
+.request-status{
+  text-align:center;font-family:var(--font-mono);font-size:12px;
+  min-height:18px;transition:color 0.2s;
+}
+.request-status.error{color:var(--error)}
+.request-status.success{color:var(--success)}
+.request-status.loading{color:var(--text-3)}
+
+/* ═══ FOOTER ═══ */
+.gate-footer{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  font-size:11px;color:var(--text-3);letter-spacing:0.03em;
+  text-align:center;z-index:1;
+}
+.gate-footer a{color:var(--text-2);text-decoration:none;transition:color 0.2s var(--ease-out)}
+.gate-footer a:hover{color:var(--copper)}
+
+/* ═══ THEME TOGGLE ═══ */
+.theme-toggle{
+  position:fixed;top:20px;right:20px;z-index:10;
+  width:36px;height:36px;border-radius:50%;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text-2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color 0.25s var(--ease-out),color 0.25s var(--ease-out),background 0.25s var(--ease-out);
+  min-width:44px;min-height:44px;
+}
+.theme-toggle:hover{border-color:var(--copper);color:var(--copper);background:var(--copper-ghost)}
+.theme-toggle svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* ═══ FOCUS ═══ */
+:focus-visible{outline:2px solid var(--copper);outline-offset:2px}
+
+/* ═══ RESPONSIVE ═══ */
+@media(min-width:640px){
+  .horizon-ring{width:120px;height:120px}
+  .horizon-ring-inner{inset:18px}
+  .horizon-ring-stars{font-size:30px}
+  .gate-title{margin-bottom:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="ambient" aria-hidden="true"></div>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Switch to light mode">
+  <svg id="themeIcon" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+  </svg>
+</button>
+
+<div class="gate">
+  <!-- Horizon Ring -->
+  <div class="horizon-ring" aria-hidden="true">
+    <div class="horizon-ring-outer"></div>
+    <div class="horizon-ring-inner"><div class="horizon-ring-stars">🇪🇺</div></div>
+    <div class="ring-particle"></div>
+    <div class="ring-particle"></div>
+    <div class="ring-particle"></div>
+    <div class="ring-particle"></div>
+  </div>
+
+  <h1 class="gate-title">Enter <em>Horizon</em></h1>
+  <p class="gate-subtitle">Enter your invitation code to access the Horizon Europe Project Assistant.</p>
+
+  <!-- Invite Code Input -->
+  <div class="code-section">
+    <label class="code-label" for="codeInput">Invitation Code</label>
+    <div class="code-input-row">
+      <input type="text" class="code-input" id="codeInput" placeholder="HRZ-XXXX-XXXX" maxlength="14" autocomplete="off" spellcheck="false">
+      <button class="code-submit" id="codeSubmit">Enter</button>
+    </div>
+  </div>
+
+  <div class="status-msg" id="codeStatus" aria-live="polite"></div>
+
+  <!-- Divider -->
+  <div class="divider" aria-hidden="true">
+    <div class="divider-line"></div>
+    <span class="divider-text">or</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- Request Access -->
+  <div class="request-section">
+    <button class="request-toggle" id="requestToggle">Request Access</button>
+    <div class="request-form" id="requestForm">
+      <input type="email" class="email-input" id="emailInput" placeholder="your@email.com" autocomplete="email">
+      <button class="email-submit" id="emailSubmit">Send Request</button>
+      <div class="request-status" id="requestStatus" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<div class="gate-footer">
+  Built by <a href="https://www.llulllab.com" target="_blank" rel="noopener noreferrer">Llull Lab</a> · Paris
+</div>
+
+<script>
+'use strict';
+
+(function(){
+  /* ── Config ── */
+  var VALIDATE_URL = 'https://n8n.tropus.io/webhook/invite-validate';
+  var ACCESS_URL  = 'https://n8n.tropus.io/webhook/horizon-access-request';
+  var REDIRECT_TO = 'index.html';
+
+  /* ── Check existing session on load ── */
+  var existingToken = null;
+  try { existingToken = sessionStorage.getItem('horizon-token'); } catch(e) {}
+  if (existingToken) {
+    checkSession(existingToken);
+  }
+
+  async function checkSession(token) {
+    try {
+      var res = await fetch(VALIDATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token })
+      });
+      if (res.ok) {
+        window.location.href = REDIRECT_TO;
+        return;
+      }
+      try { sessionStorage.removeItem('horizon-token'); } catch(e) {}
+    } catch(e) {
+      /* network error — stay on gate */
+    }
+  }
+
+  /* ── Theme toggle ── */
+  var MOON_SVG = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  var SUN_SVG = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  var themeToggle = document.getElementById('themeToggle');
+  var themeIcon = document.getElementById('themeIcon');
+  var savedTheme = null;
+  try { savedTheme = localStorage.getItem('horizon-theme'); } catch(e) {}
+  var currentTheme = savedTheme || 'dark';
+
+  function applyTheme(t) {
+    currentTheme = t;
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('horizon-theme', t); } catch(e) {}
+    if (t === 'dark') { themeIcon.innerHTML = MOON_SVG; themeToggle.setAttribute('aria-label', 'Switch to light mode'); }
+    else { themeIcon.innerHTML = SUN_SVG; themeToggle.setAttribute('aria-label', 'Switch to dark mode'); }
+  }
+  themeToggle.addEventListener('click', function(){ applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); });
+  applyTheme(currentTheme);
+
+  /* ── Code Validation ── */
+  var codeInput = document.getElementById('codeInput');
+  var codeSubmit = document.getElementById('codeSubmit');
+  var codeStatus = document.getElementById('codeStatus');
+
+  codeSubmit.addEventListener('click', validateCode);
+  codeInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') validateCode();
+  });
+
+  async function validateCode() {
+    var code = codeInput.value.trim().toUpperCase();
+    if (!code) {
+      showCodeStatus('Please enter an invitation code', 'error');
+      return;
+    }
+
+    codeSubmit.disabled = true;
+    showCodeStatus('Validating...', 'loading');
+
+    try {
+      var res = await fetch(VALIDATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invite_code: code })
+      });
+      var data = await res.json();
+
+      if (res.ok && data.token) {
+        try { sessionStorage.setItem('horizon-token', data.token); } catch(e) {}
+        showCodeStatus('Access granted. Redirecting...', 'success');
+        setTimeout(function(){ window.location.href = REDIRECT_TO; }, 600);
+      } else {
+        showCodeStatus(data.message || 'Invalid invitation code', 'error');
+        codeSubmit.disabled = false;
+      }
+    } catch(e) {
+      showCodeStatus('Connection failed. Please try again.', 'error');
+      codeSubmit.disabled = false;
+    }
+  }
+
+  function showCodeStatus(msg, type) {
+    codeStatus.textContent = msg;
+    codeStatus.className = 'status-msg ' + (type || '');
+  }
+
+  /* ── Request Access ── */
+  var requestToggle = document.getElementById('requestToggle');
+  var requestForm = document.getElementById('requestForm');
+  var emailInput = document.getElementById('emailInput');
+  var emailSubmit = document.getElementById('emailSubmit');
+  var requestStatus = document.getElementById('requestStatus');
+  var formVisible = false;
+
+  requestToggle.addEventListener('click', function() {
+    formVisible = !formVisible;
+    if (formVisible) {
+      requestToggle.style.display = 'none';
+      requestForm.classList.add('visible');
+      emailInput.focus();
+    } else {
+      requestToggle.style.display = '';
+      requestForm.classList.remove('visible');
+    }
+  });
+
+  emailSubmit.addEventListener('click', submitRequest);
+  emailInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') submitRequest();
+  });
+
+  async function submitRequest() {
+    var email = emailInput.value.trim().toLowerCase();
+    if (!email || !email.includes('@') || !email.includes('.')) {
+      showRequestStatus('Please enter a valid email address', 'error');
+      return;
+    }
+
+    emailSubmit.disabled = true;
+    showRequestStatus('Sending request...', 'loading');
+
+    try {
+      var res = await fetch(ACCESS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      });
+      var data = await res.json();
+
+      if (res.ok) {
+        showRequestStatus('Request sent. You will receive an email if approved.', 'success');
+        emailInput.disabled = true;
+      } else {
+        showRequestStatus(data.message || 'Request failed. Please try again.', 'error');
+        emailSubmit.disabled = false;
+      }
+    } catch(e) {
+      showRequestStatus('Connection failed. Please try again.', 'error');
+      emailSubmit.disabled = false;
+    }
+  }
+
+  function showRequestStatus(msg, type) {
+    requestStatus.textContent = msg;
+    requestStatus.className = 'request-status ' + (type || '');
+  }
+
+})();
+</script>
+</body>
+</html>

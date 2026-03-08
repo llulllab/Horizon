@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<!--
+  ══════════════════════════════════════════════════════
+  3 KARAR
+  ══════════════════════════════════════════════════════
+
+  1. KİŞİLİK — Brüksel'de bir büyükelçilik binasında
+     gece geç saatte çalışan, ama masasında bonsai
+     yetiştiren bir proje koordinatörü. Diplomatik ama
+     samimi, disiplinli ama yaratıcı. Zümrüt yeşili
+     ceket, bakır kol saati, şık ama soğuk değil.
+     → Newsreader (okunabilir, editorial serif) +
+       Outfit (modern, temiz, geometrik sans)
+     → Zümrüt gecesi zemin, bakır/terracotta vurgu,
+       aqua/teal aksesuar. Doğal ama profesyonel.
+
+  2. SÜRPRIZ — Welcome ekranında dönen conic-gradient
+     halka korunuyor ama renkleri zümrüt+bakır. Chat
+     mesajları blur→sharp geçişiyle sahneye giriyor.
+     Proposal card parlak bir shimmer efektiyle dikkat
+     çekiyor.
+
+  3. RİTİM — Mesajlar arası ince gradient ayraçlar
+     (teal→bakır). Welcome→chat geçişinde arka plan
+     tonu kayıyor. Her bot mesajında sol kenar vurgusu.
+  ══════════════════════════════════════════════════════
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Llull Lab — Horizon Project Tool</title>
+<meta name="description" content="Prepare your Horizon Europe proposal step by step with the Llull Lab AI assistant. Structured guidance for Part B documents.">
+<meta property="og:title" content="Llull Lab — Horizon Project Tool">
+<meta property="og:description" content="AI-powered Horizon Europe proposal preparation assistant by Llull Lab.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇪🇺</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,300;1,6..72,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg-abyss:#0a1410;
+  --bg-primary:#0e1a14;
+  --bg-secondary:#121e18;
+  --bg-conv:#142018;
+  --bg-user-msg:#1a2e24;
+  --bg-bot-msg:#121c16;
+  --bg-surface:#1a2c22;
+  --bg-glow:rgba(10,20,16,0.90);
+
+  --copper:#c47a4a;
+  --copper-bright:#da9462;
+  --copper-dim:#8a5430;
+  --copper-glow:rgba(196,122,74,0.12);
+  --copper-ghost:rgba(196,122,74,0.06);
+
+  --teal:#5a9a8a;
+  --teal-dim:rgba(90,154,138,0.12);
+  --teal-ghost:rgba(90,154,138,0.06);
+
+  --text-1:#dce8e0;
+  --text-2:#8a9e90;
+  --text-3:#7a9488; /* KG: kontrast 5.1:1 on conv */
+  --text-heading:#e8f0ea;
+
+  --error:#c45454;
+  --success:#5ab87a;
+
+  --border:rgba(90,154,138,0.10);
+  --border-light:rgba(90,154,138,0.18);
+  --border-copper:rgba(196,122,74,0.25);
+
+  --font-display:'Newsreader',Georgia,serif;
+  --font-body:'Outfit',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','Courier New',monospace;
+
+  --space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;
+  --space-xl:32px;--space-2xl:48px;--space-3xl:64px;
+  --ease-out:cubic-bezier(0.22,1,0.36,1);
+  --ease-bounce:cubic-bezier(0.34,1.56,0.64,1);
+}
+
+[data-theme="light"]{
+  --bg-abyss:#f2ede4;
+  --bg-primary:#ece6dc;
+  --bg-secondary:#e4ded4;
+  --bg-conv:#f0eae0;
+  --bg-user-msg:#d8d2c6;
+  --bg-bot-msg:#e8e2d8;
+  --bg-surface:#dcd6ca;
+  --bg-glow:rgba(242,237,228,0.90);
+
+  --copper:#7a4a20;
+  --copper-bright:#5a3410;
+  --copper-dim:#c47a4a;
+  --copper-glow:rgba(122,74,32,0.08);
+  --copper-ghost:rgba(122,74,32,0.04);
+
+  --teal:#2a6a5a;
+  --teal-dim:rgba(42,106,90,0.08);
+  --teal-ghost:rgba(42,106,90,0.04);
+
+  --text-1:#141e18;
+  --text-2:#4a5e50;
+  --text-3:#4a5c50; /* KG: kontrast 4.7:1 on user-msg */
+  --text-heading:#0a1410;
+
+  --error:#a03030;
+  --success:#2a7a4a;
+
+  --border:rgba(42,106,90,0.12);
+  --border-light:rgba(42,106,90,0.20);
+  --border-copper:rgba(122,74,32,0.30);
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}
+  html{scroll-behavior:auto}
+}
+
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+body{
+  font-family:var(--font-body);background:var(--bg-abyss);color:var(--text-1);
+  height:100vh;display:flex;flex-direction:column;overflow:hidden;overflow-x:hidden;
+  font-size:16px;line-height:1.6;
+}
+
+::selection{background:rgba(196,122,74,0.25);color:var(--text-heading)}
+[data-theme="light"] ::selection{background:rgba(122,74,32,0.18);color:var(--text-heading)}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--copper-dim);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--copper)}
+
+:focus-visible{outline:2px solid var(--copper);outline-offset:2px}
+
+.skip-link{
+  position:absolute;top:-100%;left:var(--space-md);
+  padding:var(--space-sm) var(--space-md);background:var(--copper);color:var(--bg-abyss);
+  font-family:var(--font-body);font-size:13px;font-weight:600;
+  border-radius:0 0 8px 8px;z-index:1000;text-decoration:none;
+  transition:top 0.2s var(--ease-out);
+}
+.skip-link:focus{top:0}
+
+/* ═══ HEADER ═══ */
+.header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px var(--space-md);
+  border-bottom:1px solid var(--border);
+  background:var(--bg-glow);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  flex-shrink:0;position:relative;z-index:10;
+}
+.header::after{
+  content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--copper-dim) 30%,var(--teal-dim) 70%,transparent);
+}
+
+.header-left{display:flex;align-items:center;gap:var(--space-md)}
+
+.logo-mark{width:40px;height:40px;flex-shrink:0;border-radius:50%;overflow:hidden}
+.logo-mark img{width:100%;height:100%;object-fit:cover;display:block}
+
+.header-title{display:flex;flex-direction:column;gap:1px}
+.header-title h1{
+  font-family:var(--font-display);font-size:17px;font-weight:600;
+  letter-spacing:0.02em;color:var(--text-heading);line-height:1.1;
+}
+.header-title span{
+  font-family:var(--font-body);font-size:11px;font-weight:400;
+  color:var(--text-2);letter-spacing:0.06em;text-transform:uppercase;
+}
+
+.header-actions{display:flex;align-items:center;gap:var(--space-sm)}
+
+.theme-toggle{
+  width:36px;height:36px;border-radius:50%;
+  border:1px solid var(--border);background:transparent;
+  color:var(--text-2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color 0.25s var(--ease-out),color 0.25s var(--ease-out),background 0.25s var(--ease-out);
+  min-width:44px;min-height:44px;flex-shrink:0;
+}
+.theme-toggle:hover{border-color:var(--copper);color:var(--copper);background:var(--copper-ghost)}
+.theme-toggle svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+.status-badge{
+  display:flex;align-items:center;gap:var(--space-sm);
+  padding:6px 14px;border-radius:20px;border:1px solid var(--border);
+  font-size:11px;font-weight:500;color:var(--text-2);
+  letter-spacing:0.04em;text-transform:uppercase;
+}
+.status-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--success);
+  box-shadow:0 0 6px rgba(90,184,122,0.5);
+  animation:statusPulse 2.5s ease-in-out infinite;
+}
+@keyframes statusPulse{
+  0%,100%{opacity:1;box-shadow:0 0 6px rgba(90,184,122,0.5)}
+  50%{opacity:0.5;box-shadow:0 0 2px rgba(90,184,122,0.2)}
+}
+
+.header-btn{
+  display:none;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:6px;
+  border:1px solid var(--border-copper);background:var(--copper-glow);
+  color:var(--copper-bright);font-family:var(--font-body);
+  font-size:11px;font-weight:600;cursor:pointer;
+  transition:background 0.2s var(--ease-out),border-color 0.2s var(--ease-out),transform 0.15s var(--ease-out);
+  letter-spacing:0.04em;text-transform:uppercase;min-height:44px;
+}
+.header-btn:hover{background:rgba(196,122,74,0.18);border-color:var(--copper);transform:translateY(-1px)}
+.header-btn svg{width:14px;height:14px}
+.header-btn.visible{display:flex}
+.header-btn.docx-btn{border-color:var(--teal-dim);background:var(--teal-ghost);color:var(--teal)}
+.header-btn.docx-btn:hover{background:rgba(90,154,138,0.15);border-color:var(--teal)}
+
+/* ═══ CONVERSATION — Terminal ═══ */
+.conv-container{
+  flex:1;overflow-y:auto;padding:var(--space-md);
+  display:flex;flex-direction:column;gap:0;
+  scroll-behavior:smooth;position:relative;
+}
+.conv-container::before{
+  content:'';position:fixed;top:50%;left:50%;width:600px;height:600px;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle,var(--copper-glow) 0%,transparent 70%);
+  pointer-events:none;z-index:0;opacity:0.3;
+}
+
+/* ═══ WELCOME ═══ */
+.welcome{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex:1;gap:var(--space-lg);text-align:center;
+  animation:welcomeIn 1s var(--ease-out);position:relative;z-index:1;
+}
+@keyframes welcomeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.horizon-ring{width:120px;height:120px;position:relative;margin-bottom:var(--space-md)}
+.horizon-ring-outer{
+  position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(
+    from 0deg,var(--copper) 0deg,var(--bg-abyss) 40deg,
+    var(--teal) 120deg,var(--bg-abyss) 200deg,
+    var(--copper) 280deg,var(--bg-abyss) 340deg,var(--copper) 360deg
+  );
+  animation:ringRotate 8s linear infinite;
+  mask:radial-gradient(circle,transparent 58%,black 60%,black 100%);
+  -webkit-mask:radial-gradient(circle,transparent 58%,black 60%,black 100%);
+}
+.horizon-ring-inner{
+  position:absolute;inset:18px;border-radius:50%;
+  border:1px solid var(--border-copper);
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 40% 40%,rgba(196,122,74,0.06),transparent);
+}
+.horizon-ring-stars{font-size:32px;line-height:1;filter:drop-shadow(0 0 8px rgba(196,122,74,0.3))}
+@keyframes ringRotate{to{transform:rotate(360deg)}}
+
+.ring-particle{
+  position:absolute;width:3px;height:3px;background:var(--copper);
+  border-radius:50%;opacity:0;animation:particleFloat 4s ease-in-out infinite;
+}
+.ring-particle:nth-child(2){top:10%;left:80%;animation-delay:0.8s}
+.ring-particle:nth-child(3){top:70%;left:90%;animation-delay:1.6s}
+.ring-particle:nth-child(4){top:85%;left:20%;animation-delay:2.4s}
+.ring-particle:nth-child(5){top:15%;left:10%;animation-delay:3.2s}
+@keyframes particleFloat{
+  0%,100%{opacity:0;transform:translateY(0) scale(0.5)}
+  50%{opacity:0.7;transform:translateY(-12px) scale(1)}
+}
+
+.welcome h2{
+  font-family:var(--font-display);font-size:clamp(1.7rem,4vw,2.4rem);
+  font-weight:600;color:var(--text-heading);letter-spacing:-0.02em;line-height:1.1;
+}
+.welcome h2 em{font-style:italic;color:var(--copper)}
+.welcome p{font-size:14px;font-weight:300;color:var(--text-2);max-width:440px;line-height:1.8}
+
+.welcome-hints{display:flex;gap:var(--space-sm);flex-wrap:wrap;justify-content:center;margin-top:var(--space-sm)}
+.hint-chip{
+  padding:10px 20px;border:1px solid var(--border);border-radius:24px;
+  font-size:13px;font-weight:400;color:var(--text-2);cursor:pointer;
+  transition:border-color 0.2s var(--ease-out),color 0.2s var(--ease-out),background 0.2s var(--ease-out),transform 0.15s var(--ease-out);
+  background:transparent;font-family:var(--font-body);min-height:44px;
+  display:flex;align-items:center;
+}
+.hint-chip:hover{border-color:var(--copper);color:var(--copper-bright);background:var(--copper-glow);transform:translateY(-2px)}
+
+/* ═══ MESSAGES — Terminal Konsol ═══ */
+/* İTERASYON: Balon tabanlı chat → terminal satır akışı */
+.message{
+  display:flex;gap:0;max-width:100%;
+  animation:msgIn 0.4s var(--ease-out);position:relative;z-index:1;
+  padding:6px 0;border-bottom:1px solid rgba(90,154,138,0.04);
+  font-family:var(--font-mono);font-size:13px;line-height:1.8;
+  align-items:flex-start;
+}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px);filter:blur(1px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+
+.message.user{align-self:stretch;flex-direction:row}
+.message.bot{align-self:stretch;flex-direction:row}
+
+/* Satır numarası */
+.msg-line-num{
+  width:40px;flex-shrink:0;text-align:right;padding-right:12px;
+  color:var(--text-3);font-size:11px;user-select:none;
+  border-right:1px solid rgba(196,122,74,0.10);margin-right:16px;
+  font-family:var(--font-mono);line-height:1.8;padding-top:1px;
+  opacity:0.6;
+}
+
+/* Avatar artık yok — prefix olarak değişti */
+.msg-avatar{display:none}
+
+/* Prefix: horizon › veya you › */
+.msg-prefix{
+  flex-shrink:0;margin-right:10px;
+  font-family:var(--font-mono);font-weight:500;font-size:13px;
+  line-height:1.8;white-space:nowrap;
+}
+.message.bot .msg-prefix{color:var(--copper)}
+.message.user .msg-prefix{color:var(--teal)}
+
+/* İçerik: balon yok, düz metin */
+.msg-content{
+  padding:0;border-radius:0;border:none;background:none;
+  font-family:var(--font-mono);font-size:13px;line-height:1.8;
+  color:var(--text-1);font-weight:300;flex:1;min-width:0;
+}
+.message.bot .msg-content{
+  background:none;border:none;border-left:none;
+  color:var(--text-1);
+}
+.message.user .msg-content{
+  background:none;border:none;
+  color:var(--teal);
+}
+
+/* Bot mesajlarında son karakter yanıp sönen cursor */
+.message.bot .msg-content::after{
+  content:'█';animation:termBlink 1s step-end infinite;
+  color:var(--copper);margin-left:2px;font-size:11px;
+  vertical-align:baseline;
+}
+@keyframes termBlink{50%{opacity:0}}
+
+/* Markdown içerik stilleri terminal'e uyarlandı */
+.msg-content h2,.msg-content h3{
+  font-family:var(--font-mono);font-weight:500;color:var(--copper);
+  margin:8px 0 4px;font-size:13px;text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+.msg-content h2::before{content:'## ';color:var(--copper-dim);font-weight:300}
+.msg-content h3::before{content:'### ';color:var(--copper-dim);font-weight:300}
+.msg-content h2:first-child,.msg-content h3:first-child{margin-top:0}
+.msg-content p{margin:4px 0}
+.msg-content strong{color:var(--copper-bright);font-weight:500}
+.msg-content em{color:var(--text-2);font-style:italic}
+.msg-content code{
+  font-family:var(--font-mono);font-size:12px;
+  background:rgba(196,122,74,0.08);padding:1px 6px;border-radius:3px;
+  color:var(--copper);border:1px solid rgba(196,122,74,0.12);
+}
+.msg-content table{border-collapse:collapse;margin:8px 0;width:100%;font-family:var(--font-mono);font-size:12px}
+.msg-content th,.msg-content td{padding:6px 12px;border:1px solid rgba(90,154,138,0.10);text-align:left}
+.msg-content th{background:var(--copper-glow);color:var(--copper);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:0.05em}
+.msg-content blockquote{
+  border-left:2px solid var(--copper-dim);padding:4px 12px;margin:8px 0;
+  background:rgba(196,122,74,0.03);color:var(--text-2);font-style:italic;
+}
+.msg-content ul,.msg-content ol{padding-left:20px;margin:4px 0}
+.msg-content li{margin:2px 0}
+.msg-content hr{border:none;border-top:1px solid rgba(90,154,138,0.08);margin:8px 0}
+
+/* ═══ PROPOSAL CARD ═══ */
+.proposal-card{
+  background:linear-gradient(160deg,rgba(196,122,74,0.05),rgba(90,154,138,0.03),transparent);
+  border:1px solid var(--border-copper);border-radius:16px;
+  padding:var(--space-lg);margin-top:var(--space-sm);
+  animation:cardIn 0.6s var(--ease-out);position:relative;overflow:hidden;
+}
+.proposal-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--copper),var(--teal),var(--copper));
+  background-size:200% 100%;animation:shimmer 3s ease-in-out infinite;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.proposal-card-header{display:flex;align-items:center;gap:14px;margin-bottom:var(--space-md);padding-bottom:var(--space-md);border-bottom:1px solid var(--border)}
+.proposal-card-icon{
+  width:46px;height:46px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(196,122,74,0.15),rgba(196,122,74,0.04));
+  border:1px solid var(--border-copper);display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.proposal-card-title h3{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--copper-bright);margin:0 0 4px;line-height:1.2}
+.proposal-card-title span{font-size:11px;color:var(--text-2);font-weight:400;letter-spacing:0.03em}
+
+.proposal-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:var(--space-lg)}
+@media(min-width:640px){.proposal-meta-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}}
+
+.proposal-meta-item{
+  background:rgba(0,0,0,0.15);border-radius:10px;padding:14px 16px;
+  border:1px solid var(--border);transition:border-color 0.2s var(--ease-out);
+}
+.proposal-meta-item:hover{border-color:var(--border-copper)}
+.proposal-meta-item label{display:block;font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.proposal-meta-item span{font-size:15px;font-weight:600;color:var(--text-heading);font-family:var(--font-display)}
+
+.proposal-sections{display:flex;flex-direction:column;gap:6px;margin-bottom:var(--space-lg)}
+.proposal-section-row{
+  display:flex;align-items:center;gap:12px;padding:12px 16px;
+  background:rgba(0,0,0,0.08);border-radius:8px;font-size:13px;
+  color:var(--text-2);border:1px solid transparent;
+  transition:border-color 0.2s var(--ease-out),background 0.2s var(--ease-out);
+}
+.proposal-section-row:hover{border-color:var(--border);background:rgba(0,0,0,0.14)}
+.proposal-section-row .check{color:var(--copper);font-weight:700;font-size:14px}
+
+.proposal-actions{display:flex;gap:10px;flex-direction:column}
+@media(min-width:640px){.proposal-actions{flex-direction:row}}
+
+.proposal-action-btn{
+  display:flex;align-items:center;gap:8px;padding:12px 22px;border-radius:8px;
+  font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;
+  transition:transform 0.15s var(--ease-out),box-shadow 0.2s var(--ease-out),background 0.2s var(--ease-out),border-color 0.2s var(--ease-out);
+  border:none;min-height:44px;letter-spacing:0.02em;
+}
+.proposal-action-btn.primary{background:linear-gradient(135deg,var(--copper-dim),var(--copper));color:var(--bg-abyss)}
+.proposal-action-btn.primary:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(196,122,74,0.25)}
+.proposal-action-btn.secondary{background:transparent;border:1px solid var(--border);color:var(--text-2)}
+.proposal-action-btn.secondary:hover{border-color:var(--border-copper);color:var(--copper-bright);background:var(--copper-glow)}
+.proposal-action-btn svg{width:16px;height:16px}
+
+/* ═══ TYPING — Terminal Processing ═══ */
+/* İTERASYON: 3 nokta → terminal processing satırı */
+.typing{
+  display:flex;gap:0;align-self:stretch;
+  animation:msgIn 0.3s var(--ease-out);position:relative;z-index:1;
+  padding:6px 0;border-bottom:1px solid rgba(90,154,138,0.04);
+  font-family:var(--font-mono);font-size:13px;line-height:1.8;
+  align-items:flex-start;
+}
+.typing .msg-line-num{
+  width:40px;flex-shrink:0;text-align:right;padding-right:12px;
+  color:var(--text-3);font-size:11px;user-select:none;
+  border-right:1px solid rgba(196,122,74,0.10);margin-right:16px;
+  font-family:var(--font-mono);line-height:1.8;opacity:0.6;
+}
+.typing .msg-prefix{
+  flex-shrink:0;margin-right:10px;
+  font-family:var(--font-mono);font-weight:500;font-size:13px;
+  color:var(--copper);line-height:1.8;white-space:nowrap;
+}
+.typing-dots{
+  display:inline-flex;align-items:center;gap:3px;
+  color:var(--text-3);font-family:var(--font-mono);font-size:13px;
+  line-height:1.8;
+}
+.typing-label{
+  font-family:var(--font-mono);font-size:13px;color:var(--text-3);
+  line-height:1.8;margin-right:6px;
+}
+.typing-dots span{
+  display:inline-block;width:6px;height:2px;
+  background:var(--copper-dim);border-radius:1px;
+  animation:termDash 0.9s ease-in-out infinite;
+}
+.typing-dots span:nth-child(2){animation-delay:0.12s}
+.typing-dots span:nth-child(3){animation-delay:0.24s}
+.typing-dots span:nth-child(4){animation-delay:0.36s}
+@keyframes termDash{0%,100%{opacity:0.15;transform:scaleX(1)}50%{opacity:1;transform:scaleX(1.5)}}
+
+/* ═══ INPUT AREA — Terminal ═══ */
+.input-area{
+  padding:var(--space-md);border-top:1px solid var(--border);
+  background:var(--bg-secondary);flex-shrink:0;position:relative;
+}
+.input-area::before{
+  content:'';position:absolute;top:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(196,122,74,0.15) 30%,rgba(90,154,138,0.10) 70%,transparent);
+}
+.input-wrapper{display:flex;align-items:flex-end;gap:8px;max-width:800px;margin:0 auto}
+.input-prompt{
+  font-family:var(--font-mono);font-size:13px;font-weight:500;
+  color:var(--teal);line-height:1.5;padding-bottom:16px;
+  flex-shrink:0;white-space:nowrap;
+}
+.input-field{
+  flex:1;background:transparent;border:1px solid rgba(90,154,138,0.08);
+  border-radius:6px;padding:14px 16px;
+  font-family:var(--font-mono);font-size:13px;font-weight:300;
+  color:var(--text-1);resize:none;outline:none;
+  min-height:50px;max-height:160px;line-height:1.5;
+  transition:border-color 0.2s var(--ease-out),box-shadow 0.2s var(--ease-out);
+  caret-color:var(--copper);
+}
+.input-field::placeholder{color:var(--text-3);font-weight:300}
+.input-field:focus{border-color:var(--copper-dim);box-shadow:0 0 0 2px var(--copper-ghost)}
+
+.send-btn{
+  height:50px;padding:0 22px;border-radius:25px;
+  border:1px solid var(--border-copper);
+  background:linear-gradient(135deg,rgba(196,122,74,0.14),rgba(90,154,138,0.06));
+  color:var(--copper);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:background 0.25s var(--ease-out),border-color 0.25s var(--ease-out),transform 0.15s var(--ease-out),box-shadow 0.3s var(--ease-out);
+  flex-shrink:0;min-height:44px;min-width:44px;
+  position:relative;
+}
+.send-btn::before{
+  content:'';position:absolute;inset:-3px;border-radius:28px;
+  background:conic-gradient(from 180deg,var(--copper),transparent 40%,var(--teal) 55%,transparent 70%,var(--copper));
+  opacity:0;transition:opacity 0.3s var(--ease-out);
+  z-index:-1;animation:sendGlowSpin 4s linear infinite;
+  filter:blur(4px);
+}
+.send-btn:hover:not(:disabled)::before{opacity:0.5}
+@keyframes sendGlowSpin{to{transform:rotate(360deg)}}
+.send-btn:hover:not(:disabled){
+  background:linear-gradient(135deg,rgba(196,122,74,0.25),rgba(90,154,138,0.10));
+  border-color:var(--copper);transform:translateY(-2px);
+  box-shadow:0 6px 24px rgba(196,122,74,0.2),0 0 40px rgba(196,122,74,0.06);
+}
+.send-btn:hover:not(:disabled) .send-sun{transform:translateY(-3px)}
+.send-btn:active:not(:disabled){transform:scale(0.95)}
+.send-btn:disabled{opacity:0.3;cursor:not-allowed}
+.send-btn svg.send-icon{width:24px;height:16px;flex-shrink:0}
+.send-sun{transition:transform 0.35s var(--ease-bounce)}
+
+.footer-note{text-align:center;margin-top:10px;font-size:11px;color:var(--text-3);letter-spacing:0.03em}
+.footer-note a{color:var(--text-2);text-decoration:none;transition:color 0.2s var(--ease-out)}
+.footer-note a:hover{color:var(--copper)}
+
+/* ═══ MSG SEPARATOR — Terminal ═══ */
+.msg-separator{
+  width:100%;height:0;
+  border-top:1px dashed rgba(196,122,74,0.08);
+  align-self:stretch;margin:4px 0;
+}
+
+/* ═══ TOASTS ═══ */
+.toast{
+  position:fixed;top:20px;right:20px;padding:14px 22px;border-radius:10px;
+  font-size:13px;font-weight:500;z-index:100;
+  animation:toastIn 0.4s var(--ease-out);display:none;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.error-toast{background:rgba(196,84,84,0.1);border:1px solid var(--error);color:var(--error)}
+.success-toast{background:rgba(90,184,122,0.1);border:1px solid var(--success);color:var(--success)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ═══ RESPONSIVE ═══ */
+.welcome-hints{flex-direction:column;align-items:center}
+.header-actions{gap:4px}
+.header-btn{padding:6px 8px;font-size:10px}
+
+@media(min-width:640px){
+  .conv-container{padding:var(--space-xl) var(--space-2xl);gap:0}
+  .welcome-hints{flex-direction:row}
+  .message{max-width:100%}
+  .header-actions{gap:var(--space-sm)}
+  .header-btn{padding:7px 14px;font-size:11px}
+  .horizon-ring{width:150px;height:150px}
+  .header{padding:var(--space-md) var(--space-xl)}
+  .input-area{padding:var(--space-lg) var(--space-xl)}
+}
+@media(min-width:768px){
+  .header{padding:var(--space-lg) var(--space-2xl)}
+  .input-area{padding:var(--space-lg) var(--space-2xl)}
+}
+
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
+</head>
+<body>
+
+<a href="#main-conv" class="skip-link">Skip to conversation</a>
+
+<header class="header" role="banner">
+  <div class="header-left">
+    <div class="logo-mark"><img src="logo.jpg" alt="Llull Lab logo" /></div>
+    <div class="header-title">
+      <h1>Llull Lab</h1>
+      <span>Horizon Europe Project Assistant</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="theme-toggle" id="themeToggle" aria-label="Switch to light mode">
+      <svg id="themeIcon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+    <button class="header-btn visible" id="newSessionBtn" aria-label="Start new session">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+      New
+    </button>
+    <button class="header-btn docx-btn" id="docxBtn" aria-label="Download Part B as DOCX">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      DOCX
+    </button>
+    <div class="status-badge" aria-live="polite"><div class="status-dot" aria-hidden="true"></div>Online</div>
+  </div>
+</header>
+
+<main class="conv-container" id="mainConv" role="log" aria-label="Conversation messages">
+  <div class="welcome" id="welcomeScreen">
+    <div class="horizon-ring" aria-hidden="true">
+      <div class="horizon-ring-outer"></div>
+      <div class="horizon-ring-inner"><div class="horizon-ring-stars">🇪🇺</div></div>
+      <div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div>
+    </div>
+    <h2>Your <em>Horizon</em> Begins Here</h2>
+    <p>Prepare your Horizon Europe proposal step by step. Share your project idea and I'll guide you through the full Part B application structure.</p>
+    <div class="welcome-hints" id="welcomeHints">
+      <button class="hint-chip" data-hint="I have a project idea">I have a project idea</button>
+      <button class="hint-chip" data-hint="Help me find the right call">Help me find the right call</button>
+      <button class="hint-chip" data-hint="I need to prepare a RIA proposal">I need to prepare a RIA proposal</button>
+    </div>
+  </div>
+</main>
+
+<div class="input-area">
+  <div class="input-wrapper">
+    <span class="input-prompt" aria-hidden="true">you ›</span>
+    <label for="messageInput" class="sr-only">Type your message</label>
+    <textarea class="input-field" id="messageInput" placeholder="Type your message..." rows="1" aria-label="Message input"></textarea>
+    <button class="send-btn" id="sendBtn" aria-label="Send message">
+      <svg class="send-icon" viewBox="0 0 32 20" fill="none" aria-hidden="true">
+        <line x1="0" y1="16" x2="32" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+        <circle class="send-sun" cx="16" cy="12" r="4.5" fill="currentColor" opacity="0.9"/>
+        <line class="send-sun" x1="16" y1="5" x2="16" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line class="send-sun" x1="10.2" y1="6.8" x2="11.5" y2="8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        <line class="send-sun" x1="21.8" y1="6.8" x2="20.5" y2="8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        <line class="send-sun" x1="8" y1="12" x2="10" y2="12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        <line class="send-sun" x1="22" y1="12" x2="24" y2="12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <div class="footer-note">Built by <a href="https://www.llulllab.com" target="_blank" rel="noopener noreferrer">Llull Lab</a> · Paris</div>
+</div>
+
+<div class="toast error-toast" id="errorToast" role="alert"></div>
+<div class="toast success-toast" id="successToast" role="status"></div>
+
+<script>
+'use strict';
+
+(function(){
+  /* ── Token Guard ── */
+  var VALIDATE_URL='https://n8n.tropus.io/webhook/invite-validate';
+  var GATE_URL='gate.html';
+  var horizonToken=null;
+  try{horizonToken=sessionStorage.getItem('horizon-token')}catch(e){}
+  if(!horizonToken){window.location.href=GATE_URL;return}
+
+  /* Async session validation — redirect if invalid */
+  (async function(){
+    try{
+      var res=await fetch(VALIDATE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:horizonToken})});
+      if(!res.ok){try{sessionStorage.removeItem('horizon-token')}catch(e){}window.location.href=GATE_URL}
+    }catch(e){/* network error — allow offline usage */}
+  })();
+
+  /* ── Config ── */
+  var CONFIG = {
+    webhookUrl:'https://n8n.tropus.io/webhook/horizon',
+    sessionId:'session-'+(typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID().slice(0,12):Math.random().toString(36).substr(2,9)),
+    apiKey:''
+  };
+
+  var isWaiting=false,lastBotRaw='',botMessageCount=0;
+  var lastProposalData=null,lastDocxBase64=null,lastDocxFilename=null,lastMsgType=null;
+
+  /* ── Theme toggle ── */
+  var MOON_SVG='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  var SUN_SVG='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  var themeToggle=document.getElementById('themeToggle');
+  var themeIcon=document.getElementById('themeIcon');
+  var savedTheme=null;
+  try{savedTheme=localStorage.getItem('horizon-theme')}catch(e){}
+  var currentTheme=savedTheme||'dark';
+
+  function applyTheme(t){
+    currentTheme=t;document.documentElement.setAttribute('data-theme',t);
+    try{localStorage.setItem('horizon-theme',t)}catch(e){}
+    if(t==='dark'){themeIcon.innerHTML=MOON_SVG;themeToggle.setAttribute('aria-label','Switch to light mode')}
+    else{themeIcon.innerHTML=SUN_SVG;themeToggle.setAttribute('aria-label','Switch to dark mode')}
+  }
+  themeToggle.addEventListener('click',function(){applyTheme(currentTheme==='dark'?'light':'dark')});
+  applyTheme(currentTheme);
+
+  /* ── DOM ── */
+  var messageInput=document.getElementById('messageInput');
+  var sendBtn=document.getElementById('sendBtn');
+  var container=document.getElementById('mainConv');
+
+  /* ── Event listeners (no inline onclick) ── */
+  document.getElementById('newSessionBtn').addEventListener('click',newSession);
+  document.getElementById('docxBtn').addEventListener('click',downloadDOCX);
+  sendBtn.addEventListener('click',sendMessage);
+  messageInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
+  messageInput.addEventListener('input',function(){autoResize(messageInput)});
+
+  /* Hint chips — delegated */
+  document.addEventListener('click',function(e){
+    var chip=e.target.closest('.hint-chip[data-hint]');
+    if(chip){messageInput.value=chip.getAttribute('data-hint');sendMessage()}
+  });
+
+  /* ── Functions ── */
+  function newSession(){
+    if(isWaiting)return;
+    CONFIG.sessionId='session-'+Math.random().toString(36).substr(2,9)+Date.now().toString(36).substr(-4);
+    lastProposalData=null;lastDocxBase64=null;lastDocxFilename=null;
+    lastBotRaw='';botMessageCount=0;lastMsgType=null;lineCounter=0;
+    document.getElementById('docxBtn').classList.remove('visible');
+    container.innerHTML='<div class="welcome" id="welcomeScreen"><div class="horizon-ring" aria-hidden="true"><div class="horizon-ring-outer"></div><div class="horizon-ring-inner"><div class="horizon-ring-stars">🇪🇺</div></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div></div><h2>Your <em>Horizon</em> Begins Here</h2><p>Prepare your Horizon Europe proposal step by step. Share your project idea and I\'ll guide you through the full Part B application structure.</p><div class="welcome-hints" id="welcomeHints"><button class="hint-chip" data-hint="I have a project idea">I have a project idea</button><button class="hint-chip" data-hint="Help me find the right call">Help me find the right call</button><button class="hint-chip" data-hint="I need to prepare a RIA proposal">I need to prepare a RIA proposal</button></div></div>';
+    showSuccess('New session started.');
+  }
+
+  function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,160)+'px'}
+
+  function parseMarkdown(text){
+    if(!text)return'';text=text.replace(/^=/,'').trim();
+    var html=text.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^---$/gm,'<hr>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>');
+    if(html.includes('|')){
+      html=html.replace(/((?:\|.+\|\n?)+)/g,function(match){
+        var rows=match.trim().split('\n').filter(function(r){return!r.match(/^\|[\s\-:|]+\|$/)});
+        if(rows.length<1)return match;
+        var table='<table>';
+        rows.forEach(function(row,i){
+          var cells=row.split('|').filter(function(c){return c.trim()});
+          var tag=i===0?'th':'td';
+          table+='<tr>'+cells.map(function(c){return'<'+tag+'>'+c.trim()+'</'+tag+'>'}).join('')+'</tr>';
+        });
+        return table+'</table>';
+      });
+    }
+    html=html.replace(/\n\n/g,'</p><p>');
+    html='<p>'+html+'</p>';
+    html=html.replace(/<p>\s*<(h[23]|hr|table|blockquote)/g,'<$1').replace(/<\/(h[23]|hr|table|blockquote)>\s*<\/p>/g,'</$1>').replace(/<p><\/p>/g,'').replace(/\n/g,'<br>');
+    return html;
+  }
+
+  function fmtNum(n){return Number(n||0).toLocaleString('en-US')}
+
+  function buildProposalCard(data){
+    var m=data.metadata||{};var s3=data.section_3_implementation||{};
+    var wpCount=(s3.s3_1_work_packages||[]).length;
+    var partnerCount=(s3.s3_2_consortium&&s3.s3_2_consortium.partners?s3.s3_2_consortium.partners.length:0)+(s3.s3_2_consortium&&s3.s3_2_consortium.coordinator?1:0);
+    var msCount=(s3.s3_3_milestones||[]).length;
+    var dlCount=(s3.s3_4_deliverables||[]).length;
+    var s1=data.section_1_excellence||{};
+    var s2=data.section_2_impact||{};
+
+    return'<div class="proposal-card"><div class="proposal-card-header"><div class="proposal-card-icon" aria-hidden="true">📋</div><div class="proposal-card-title"><h3>'+(m.project_title||'Proposal Draft')+'</h3><span>'+(m.acronym||'')+' &middot; '+(m.call_identifier||'')+' &middot; '+(m.action_type||'RIA')+'</span></div></div><div class="proposal-meta-grid"><div class="proposal-meta-item"><label>Duration</label><span>'+(m.duration_months||'—')+' months</span></div><div class="proposal-meta-item"><label>TRL Range</label><span>TRL '+(m.trl_start||'?')+' → TRL '+(m.trl_target||'?')+'</span></div><div class="proposal-meta-item"><label>Total Budget</label><span>€ '+fmtNum(m.total_budget_eur)+'</span></div><div class="proposal-meta-item"><label>EU Contribution</label><span>€ '+fmtNum(m.eu_contribution_eur)+'</span></div></div><div class="proposal-sections"><div class="proposal-section-row"><span class="check" aria-hidden="true">✓</span> Section 1 — Excellence ('+(s1.s1_1_objectives_and_ambition?'complete':'empty')+')</div><div class="proposal-section-row"><span class="check" aria-hidden="true">✓</span> Section 2 — Impact ('+(s2.s2_1_pathways_towards_impact?'complete':'empty')+')</div><div class="proposal-section-row"><span class="check" aria-hidden="true">✓</span> Section 3 — Implementation ('+wpCount+' WPs, '+partnerCount+' partners, '+msCount+' milestones, '+dlCount+' deliverables)</div></div><div class="proposal-actions"><button class="proposal-action-btn primary" id="dlDocx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Download Part B (DOCX)</button><button class="proposal-action-btn secondary" id="dlJson"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>Download JSON</button></div></div>';
+  }
+
+  /* Delegated click for proposal card buttons */
+  document.addEventListener('click',function(e){
+    if(e.target.closest('#dlDocx'))downloadDOCX();
+    if(e.target.closest('#dlJson'))downloadJSON();
+  });
+
+  /* İTERASYON: Terminal satır sayacı */
+  var lineCounter=0;
+
+  function addMessage(content,type,proposalData){
+    var welcome=document.getElementById('welcomeScreen');
+    if(welcome)welcome.remove();
+    if(lastMsgType&&lastMsgType!==type){
+      var sep=document.createElement('div');sep.className='msg-separator';sep.setAttribute('aria-hidden','true');
+      container.appendChild(sep);
+    }
+    lineCounter++;
+    var msg=document.createElement('div');msg.className='message '+type;
+    var prefix=type==='bot'?'horizon ›':'you ›';
+    var lineNum=String(lineCounter).padStart(3,'0');
+    var parsedContent;
+    if(type==='bot'){parsedContent=parseMarkdown(content);if(proposalData)parsedContent+=buildProposalCard(proposalData)}
+    else{parsedContent='<p>'+content+'</p>'}
+    msg.innerHTML='<div class="msg-line-num" aria-hidden="true">'+lineNum+'</div><div class="msg-prefix" aria-hidden="true">'+prefix+'</div><div class="msg-content">'+parsedContent+'</div>';
+    container.appendChild(msg);container.scrollTop=container.scrollHeight;
+    lastMsgType=type;
+    if(type==='bot'){lastBotRaw=content;botMessageCount++}
+  }
+
+  function showTyping(){
+    var typing=document.createElement('div');typing.className='typing';typing.id='typingIndicator';
+    var nextLine=String(lineCounter+1).padStart(3,'0');
+    typing.innerHTML='<div class="msg-line-num" aria-hidden="true">'+nextLine+'</div><div class="msg-prefix">horizon ›</div><span class="typing-label">processing</span><div class="typing-dots" aria-label="Assistant is typing"><span></span><span></span><span></span><span></span></div>';
+    container.appendChild(typing);container.scrollTop=container.scrollHeight;
+  }
+  function hideTyping(){var el=document.getElementById('typingIndicator');if(el)el.remove()}
+
+  function showError(msg){var t=document.getElementById('errorToast');if(!t)return;t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none'},4000)}
+  function showSuccess(msg){var t=document.getElementById('successToast');if(!t)return;t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none'},3000)}
+
+  async function sendMessage(){
+    var text=messageInput.value.trim();
+    if(!text||isWaiting)return;
+    addMessage(text,'user');messageInput.value='';messageInput.style.height='auto';
+    isWaiting=true;sendBtn.disabled=true;showTyping();
+
+    try{
+      var headers={'Content-Type':'application/json'};
+      if(CONFIG.apiKey)headers['x-api-key']=CONFIG.apiKey;
+      var res=await fetch(CONFIG.webhookUrl,{method:'POST',headers:headers,body:JSON.stringify({message:text,session_id:CONFIG.sessionId})});
+      hideTyping();
+      if(!res.ok)throw new Error('Server error ('+res.status+')');
+      var rawText=await res.text();var data;
+      try{data=JSON.parse(rawText)}catch(e){data=null}
+
+      if(data&&data.type==='proposal_complete'){
+        lastProposalData=data.proposal_json;lastDocxBase64=data.docx_base64;
+        lastDocxFilename=data.filename||'Horizon_PartB_Draft.docx';
+        document.getElementById('docxBtn').classList.add('visible');
+        addMessage(data.message||'Your proposal draft is ready.','bot',lastProposalData);
+      }else if(data&&data.proposal_json&&!data.docx_base64){
+        lastProposalData=data.proposal_json;
+        addMessage(data.message||data.conversation_text||'Your structured proposal data is ready.','bot',lastProposalData);
+      }else if(data&&data.conversation_text){
+        addMessage(data.conversation_text,'bot');
+      }else{addMessage(rawText,'bot')}
+    }catch(err){
+      hideTyping();showError('Connection failed. Please try again.');console.error(err);
+    }finally{isWaiting=false;sendBtn.disabled=false;messageInput.focus()}
+  }
+
+  function downloadDOCX(){
+    if(!lastDocxBase64){showError('No proposal document available yet.');return}
+    try{
+      var byteChars=atob(lastDocxBase64);var byteNumbers=new Array(byteChars.length);
+      for(var i=0;i<byteChars.length;i++)byteNumbers[i]=byteChars.charCodeAt(i);
+      var blob=new Blob([new Uint8Array(byteNumbers)],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+      var link=document.createElement('a');link.href=URL.createObjectURL(blob);
+      link.download=lastDocxFilename;document.body.appendChild(link);link.click();
+      document.body.removeChild(link);URL.revokeObjectURL(link.href);
+      showSuccess('Part B document downloaded successfully.');
+    }catch(err){console.error('DOCX download error:',err);showError('Failed to download DOCX.')}
+  }
+
+  function downloadJSON(){
+    if(!lastProposalData){showError('No proposal data available yet.');return}
+    try{
+      var jsonStr=JSON.stringify(lastProposalData,null,2);
+      var blob=new Blob([jsonStr],{type:'application/json'});
+      var acronym=lastProposalData.metadata&&lastProposalData.metadata.acronym?lastProposalData.metadata.acronym:'proposal';
+      var link=document.createElement('a');link.href=URL.createObjectURL(blob);
+      link.download=acronym+'_proposal_data.json';document.body.appendChild(link);link.click();
+      document.body.removeChild(link);URL.revokeObjectURL(link.href);
+      showSuccess('Proposal JSON downloaded successfully.');
+    }catch(err){console.error('JSON download error:',err);showError('Failed to download JSON.')}
+  }
+
+})();
+</script>
+</body>
+</html>
