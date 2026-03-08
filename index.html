@@ -815,8 +815,9 @@ body{
     try{
       var headers={'Content-Type':'application/json'};
       if(CONFIG.apiKey)headers['x-api-key']=CONFIG.apiKey;
-      var res=await fetch(CONFIG.webhookUrl,{method:'POST',headers:headers,body:JSON.stringify({message:text,session_id:CONFIG.sessionId})});
+      var res=await fetch(CONFIG.webhookUrl,{method:'POST',headers:headers,body:JSON.stringify({message:text,session_id:CONFIG.sessionId,token:horizonToken})});
       hideTyping();
+      if(res.status===401){try{sessionStorage.removeItem('horizon-token')}catch(e){}window.location.href=GATE_URL;return}
       if(!res.ok)throw new Error('Server error ('+res.status+')');
       var rawText=await res.text();var data;
       try{data=JSON.parse(rawText)}catch(e){data=null}
