@@ -3,7 +3,8 @@
 <head>
 <!--
   ══════════════════════════════════════════════════════
-  3 KARAR
+  CEDULOR — Project Support Machine
+  Structured project support through combinatorial reasoning
   ══════════════════════════════════════════════════════
 
   1. KİŞİLİK — Brüksel'de bir büyükelçilik binasında
@@ -16,26 +17,24 @@
      → Zümrüt gecesi zemin, bakır/terracotta vurgu,
        aqua/teal aksesuar. Doğal ama profesyonel.
 
-  2. SÜRPRIZ — Welcome ekranında dönen conic-gradient
-     halka korunuyor ama renkleri zümrüt+bakır. Chat
-     mesajları blur→sharp geçişiyle sahneye giriyor.
-     Proposal card parlak bir shimmer efektiyle dikkat
-     çekiyor.
+  2. SÜRPRIZ — Gate overlay (ASGE/RJE gibi) — arka
+     plan blur ile chat görünür ama kilitli. Proposal
+     card parlak shimmer efektiyle dikkat çekiyor.
 
   3. RİTİM — Mesajlar arası ince gradient ayraçlar
-     (teal→bakır). Welcome→chat geçişinde arka plan
-     tonu kayıyor. Her bot mesajında sol kenar vurgusu.
+     (teal→bakır). Gate→chat geçişinde blur kalkıyor.
+     Her bot mesajında sol kenar vurgusu.
   ══════════════════════════════════════════════════════
 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Llull Lab — Horizon Project Tool</title>
-<meta name="description" content="Prepare your Horizon Europe proposal step by step with the Llull Lab AI assistant. Structured guidance for Part B documents.">
-<meta property="og:title" content="Llull Lab — Horizon Project Tool">
-<meta property="og:description" content="AI-powered Horizon Europe proposal preparation assistant by Llull Lab.">
+<title>Cedulor — Project Support Machine</title>
+<meta name="description" content="Structured project support through combinatorial reasoning. Prepare Horizon Europe, MSCA, ERC, and EIC Accelerator proposals step by step.">
+<meta property="og:title" content="Cedulor — Project Support Machine">
+<meta property="og:description" content="AI-powered proposal preparation for Horizon Europe, MSCA, ERC, and EIC Accelerator.">
 <meta property="og:type" content="website">
 <link rel="canonical" href="">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇪🇺</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,300;1,6..72,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -64,7 +63,7 @@
 
   --text-1:#dce8e0;
   --text-2:#8a9e90;
-  --text-3:#7a9488; /* KG: kontrast 5.1:1 on conv */
+  --text-3:#7a9488;
   --text-heading:#e8f0ea;
 
   --error:#c45454;
@@ -106,7 +105,7 @@
 
   --text-1:#141e18;
   --text-2:#4a5e50;
-  --text-3:#4a5c50; /* KG: kontrast 4.7:1 on user-msg */
+  --text-3:#4a5c50;
   --text-heading:#0a1410;
 
   --error:#a03030;
@@ -191,22 +190,6 @@ body{
 .theme-toggle:hover{border-color:var(--copper);color:var(--copper);background:var(--copper-ghost)}
 .theme-toggle svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 
-.status-badge{
-  display:flex;align-items:center;gap:var(--space-sm);
-  padding:6px 14px;border-radius:20px;border:1px solid var(--border);
-  font-size:11px;font-weight:500;color:var(--text-2);
-  letter-spacing:0.04em;text-transform:uppercase;
-}
-.status-dot{
-  width:7px;height:7px;border-radius:50%;background:var(--success);
-  box-shadow:0 0 6px rgba(90,184,122,0.5);
-  animation:statusPulse 2.5s ease-in-out infinite;
-}
-@keyframes statusPulse{
-  0%,100%{opacity:1;box-shadow:0 0 6px rgba(90,184,122,0.5)}
-  50%{opacity:0.5;box-shadow:0 0 2px rgba(90,184,122,0.2)}
-}
-
 .header-btn{
   display:none;align-items:center;gap:6px;
   padding:7px 14px;border-radius:6px;
@@ -222,7 +205,165 @@ body{
 .header-btn.docx-btn{border-color:var(--teal-dim);background:var(--teal-ghost);color:var(--teal)}
 .header-btn.docx-btn:hover{background:rgba(90,154,138,0.15);border-color:var(--teal)}
 
-/* ═══ CONVERSATION — Terminal ═══ */
+/* ═══ USAGE BADGE ═══ */
+.usage-badge{
+  display:inline-flex;align-items:center;gap:var(--space-sm);
+  background:var(--copper-glow);border:1px solid var(--copper-dim);
+  border-radius:20px;padding:4px 14px;
+  font-family:var(--font-mono);font-size:11px;font-weight:500;
+  color:var(--copper);white-space:nowrap;
+}
+.usage-badge.hidden{display:none}
+.usage-badge .usage-dot{width:6px;height:6px;border-radius:50%;background:var(--success);flex-shrink:0}
+.usage-badge.warning{color:var(--copper-bright);border-color:var(--copper-dim)}
+.usage-badge.warning .usage-dot{background:var(--copper-bright)}
+.usage-badge.depleted{color:var(--error);background:rgba(196,84,84,0.1);border-color:rgba(196,84,84,0.2)}
+.usage-badge.depleted .usage-dot{background:var(--error)}
+
+/* ═══ APP WRAPPER (for gate overlay) ═══ */
+.app-wrapper{
+  display:flex;flex-direction:column;flex:1;
+  position:relative;overflow:hidden;
+}
+.app-wrapper.locked .app-content{filter:blur(6px);pointer-events:none;user-select:none;opacity:0.45}
+.app-content{display:flex;flex-direction:column;flex:1;overflow:hidden}
+
+/* ═══ GATE OVERLAY ═══ */
+.gate-overlay{
+  position:absolute;inset:0;z-index:20;
+  display:flex;align-items:center;justify-content:center;
+  padding:var(--space-lg);
+  background:rgba(10,20,16,0.6);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+}
+[data-theme="light"] .gate-overlay{background:rgba(242,237,228,0.6)}
+.gate-overlay.hidden{display:none}
+
+.gate-box{
+  background:var(--bg-primary);
+  border:1px solid var(--border-copper);
+  border-radius:20px;
+  padding:var(--space-2xl) var(--space-xl) var(--space-xl);
+  width:100%;max-width:460px;
+  position:relative;overflow:hidden;
+  animation:gateIn 0.6s var(--ease-out);
+}
+.gate-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--copper),var(--teal),var(--copper));
+  background-size:200% 100%;animation:shimmer 3s ease-in-out infinite;
+}
+@keyframes gateIn{from{opacity:0;transform:translateY(24px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.gate-logo{
+  display:flex;flex-direction:column;align-items:center;gap:var(--space-md);
+  margin-bottom:var(--space-xl);
+}
+.gate-logo-img{width:72px;height:72px;border-radius:50%;overflow:hidden;border:1px solid var(--border-copper)}
+.gate-logo-img img{width:100%;height:100%;object-fit:cover;display:block}
+.gate-logo h2{
+  font-family:var(--font-display);font-size:clamp(1.4rem,3.5vw,1.8rem);
+  font-weight:600;color:var(--text-heading);text-align:center;line-height:1.2;
+}
+.gate-logo p{
+  font-size:13px;color:var(--text-2);text-align:center;
+  max-width:340px;line-height:1.7;font-weight:300;
+}
+
+.gate-tabs-row{
+  display:flex;gap:0;margin-bottom:var(--space-xl);
+  border-bottom:1px solid var(--border);
+}
+.gate-tab{
+  flex:1;background:none;border:none;
+  padding:var(--space-md) var(--space-sm);
+  font-family:var(--font-mono);font-size:0.78rem;font-weight:600;
+  color:var(--text-3);cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:color 0.2s var(--ease-out),border-color 0.2s var(--ease-out);
+  min-height:44px;
+}
+.gate-tab:hover{color:var(--text-2)}
+.gate-tab.active{color:var(--copper);border-bottom-color:var(--copper)}
+
+.gate-panel{display:none}
+.gate-panel.active{display:block}
+
+.gate-input{
+  width:100%;background:var(--bg-secondary);
+  border:1px solid var(--border);border-radius:8px;
+  padding:14px 16px;font-family:var(--font-mono);font-size:0.9rem;
+  color:var(--text-heading);transition:border-color 0.2s var(--ease-out);
+  outline:none;
+}
+.gate-input::placeholder{color:var(--text-3);font-weight:300}
+.gate-input:focus{border-color:var(--copper-dim);box-shadow:0 0 0 3px var(--copper-ghost)}
+.gate-input.code-input{text-align:center;font-size:1.05rem;letter-spacing:0.08em;text-transform:uppercase}
+
+.gate-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--space-sm);
+  width:100%;margin-top:var(--space-lg);
+  background:linear-gradient(135deg,var(--copper-dim),var(--copper));
+  color:var(--bg-abyss);font-family:var(--font-mono);font-weight:700;font-size:0.85rem;
+  border:none;border-radius:8px;padding:14px var(--space-xl);
+  cursor:pointer;min-height:48px;letter-spacing:0.04em;text-transform:uppercase;
+  transition:background 0.2s var(--ease-out),transform 0.15s var(--ease-out),box-shadow 0.2s var(--ease-out);
+}
+.gate-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(196,122,74,0.25)}
+.gate-btn:active{transform:scale(0.97)}
+.gate-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+.gate-btn.secondary{background:var(--bg-secondary);color:var(--copper);border:1px solid var(--copper-dim)}
+.gate-btn.secondary:hover{background:var(--copper-glow)}
+
+.gate-btn .gate-spinner{
+  width:18px;height:18px;
+  border:2.5px solid rgba(10,20,16,0.2);border-top-color:var(--bg-abyss);
+  border-radius:50%;animation:spin 0.7s linear infinite;display:none;
+}
+.gate-btn.secondary .gate-spinner{border-color:rgba(196,122,74,0.2);border-top-color:var(--copper)}
+.gate-btn.loading .gate-spinner{display:block}
+.gate-btn.loading .gate-btn-text{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.gate-msg{
+  margin-top:var(--space-md);padding:var(--space-md);
+  border-radius:8px;font-size:0.8rem;text-align:center;display:none;
+  font-family:var(--font-mono);
+}
+.gate-msg.success{display:block;background:rgba(90,184,122,0.12);color:var(--success);border:1px solid rgba(90,184,122,0.2)}
+.gate-msg.error{display:block;background:rgba(196,84,84,0.12);color:var(--error);border:1px solid rgba(196,84,84,0.2)}
+
+.gate-hint{
+  font-size:0.7rem;color:var(--text-3);margin-top:var(--space-md);
+  text-align:center;line-height:1.5;
+}
+
+/* ═══ EXHAUSTED OVERLAY ═══ */
+.exhausted-overlay{
+  position:absolute;inset:0;z-index:20;
+  display:flex;align-items:center;justify-content:center;
+  padding:var(--space-lg);
+  background:rgba(10,20,16,0.6);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+}
+[data-theme="light"] .exhausted-overlay{background:rgba(242,237,228,0.6)}
+.exhausted-overlay.hidden{display:none}
+
+.exhausted-box{
+  background:var(--bg-primary);
+  border:1px solid rgba(196,84,84,0.2);
+  border-radius:20px;padding:var(--space-2xl) var(--space-xl);
+  width:100%;max-width:420px;text-align:center;
+}
+.exhausted-icon{font-size:2rem;margin-bottom:var(--space-md)}
+.exhausted-box h3{
+  font-family:var(--font-display);font-weight:600;font-size:1.1rem;
+  margin-bottom:var(--space-sm);color:var(--text-heading);
+}
+.exhausted-box p{font-size:0.8rem;color:var(--text-2);margin-bottom:var(--space-lg);line-height:1.6}
+
+/* ═══ CONVERSATION ═══ */
 .conv-container{
   flex:1;overflow-y:auto;padding:var(--space-md);
   display:flex;flex-direction:column;gap:0;
@@ -243,46 +384,25 @@ body{
 }
 @keyframes welcomeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-.horizon-ring{width:120px;height:120px;position:relative;margin-bottom:var(--space-md)}
-.horizon-ring-outer{
-  position:absolute;inset:0;border-radius:50%;
-  background:conic-gradient(
-    from 0deg,var(--copper) 0deg,var(--bg-abyss) 40deg,
-    var(--teal) 120deg,var(--bg-abyss) 200deg,
-    var(--copper) 280deg,var(--bg-abyss) 340deg,var(--copper) 360deg
-  );
-  animation:ringRotate 8s linear infinite;
-  mask:radial-gradient(circle,transparent 58%,black 60%,black 100%);
-  -webkit-mask:radial-gradient(circle,transparent 58%,black 60%,black 100%);
-}
-.horizon-ring-inner{
-  position:absolute;inset:18px;border-radius:50%;
-  border:1px solid var(--border-copper);
-  display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(circle at 40% 40%,rgba(196,122,74,0.06),transparent);
-}
-.horizon-ring-stars{font-size:32px;line-height:1;filter:drop-shadow(0 0 8px rgba(196,122,74,0.3))}
-@keyframes ringRotate{to{transform:rotate(360deg)}}
-
-.ring-particle{
-  position:absolute;width:3px;height:3px;background:var(--copper);
-  border-radius:50%;opacity:0;animation:particleFloat 4s ease-in-out infinite;
-}
-.ring-particle:nth-child(2){top:10%;left:80%;animation-delay:0.8s}
-.ring-particle:nth-child(3){top:70%;left:90%;animation-delay:1.6s}
-.ring-particle:nth-child(4){top:85%;left:20%;animation-delay:2.4s}
-.ring-particle:nth-child(5){top:15%;left:10%;animation-delay:3.2s}
-@keyframes particleFloat{
-  0%,100%{opacity:0;transform:translateY(0) scale(0.5)}
-  50%{opacity:0.7;transform:translateY(-12px) scale(1)}
-}
+.welcome-logo{width:100px;height:100px;border-radius:50%;overflow:hidden;margin-bottom:var(--space-md);border:1px solid var(--border-copper)}
+.welcome-logo img{width:100%;height:100%;object-fit:cover;display:block}
 
 .welcome h2{
   font-family:var(--font-display);font-size:clamp(1.7rem,4vw,2.4rem);
   font-weight:600;color:var(--text-heading);letter-spacing:-0.02em;line-height:1.1;
 }
 .welcome h2 em{font-style:italic;color:var(--copper)}
-.welcome p{font-size:14px;font-weight:300;color:var(--text-2);max-width:440px;line-height:1.8}
+.welcome p{font-size:14px;font-weight:300;color:var(--text-2);max-width:480px;line-height:1.8}
+
+.welcome-programmes{
+  display:flex;gap:var(--space-sm);flex-wrap:wrap;justify-content:center;margin-top:var(--space-xs);
+}
+.programme-tag{
+  padding:4px 12px;border-radius:20px;
+  font-family:var(--font-mono);font-size:0.7rem;font-weight:500;
+  background:var(--copper-glow);color:var(--copper);
+  border:1px solid var(--border-copper);
+}
 
 .welcome-hints{display:flex;gap:var(--space-sm);flex-wrap:wrap;justify-content:center;margin-top:var(--space-sm)}
 .hint-chip{
@@ -294,8 +414,7 @@ body{
 }
 .hint-chip:hover{border-color:var(--copper);color:var(--copper-bright);background:var(--copper-glow);transform:translateY(-2px)}
 
-/* ═══ MESSAGES — Terminal Konsol ═══ */
-/* İTERASYON: Balon tabanlı chat → terminal satır akışı */
+/* ═══ MESSAGES — Terminal ═══ */
 .message{
   display:flex;gap:0;max-width:100%;
   animation:msgIn 0.4s var(--ease-out);position:relative;z-index:1;
@@ -308,7 +427,6 @@ body{
 .message.user{align-self:stretch;flex-direction:row}
 .message.bot{align-self:stretch;flex-direction:row}
 
-/* Satır numarası */
 .msg-line-num{
   width:40px;flex-shrink:0;text-align:right;padding-right:12px;
   color:var(--text-3);font-size:11px;user-select:none;
@@ -317,10 +435,8 @@ body{
   opacity:0.6;
 }
 
-/* Avatar artık yok — prefix olarak değişti */
 .msg-avatar{display:none}
 
-/* Prefix: horizon › veya you › */
 .msg-prefix{
   flex-shrink:0;margin-right:10px;
   font-family:var(--font-mono);font-weight:500;font-size:13px;
@@ -329,22 +445,14 @@ body{
 .message.bot .msg-prefix{color:var(--copper)}
 .message.user .msg-prefix{color:var(--teal)}
 
-/* İçerik: balon yok, düz metin */
 .msg-content{
   padding:0;border-radius:0;border:none;background:none;
   font-family:var(--font-mono);font-size:13px;line-height:1.8;
   color:var(--text-1);font-weight:300;flex:1;min-width:0;
 }
-.message.bot .msg-content{
-  background:none;border:none;border-left:none;
-  color:var(--text-1);
-}
-.message.user .msg-content{
-  background:none;border:none;
-  color:var(--teal);
-}
+.message.bot .msg-content{background:none;border:none;color:var(--text-1)}
+.message.user .msg-content{background:none;border:none;color:var(--teal)}
 
-/* Bot mesajlarında son karakter yanıp sönen cursor */
 .message.bot .msg-content::after{
   content:'█';animation:termBlink 1s step-end infinite;
   color:var(--copper);margin-left:2px;font-size:11px;
@@ -352,7 +460,6 @@ body{
 }
 @keyframes termBlink{50%{opacity:0}}
 
-/* Markdown içerik stilleri terminal'e uyarlandı */
 .msg-content h2,.msg-content h3{
   font-family:var(--font-mono);font-weight:500;color:var(--copper);
   margin:8px 0 4px;font-size:13px;text-transform:uppercase;
@@ -392,7 +499,6 @@ body{
   background:linear-gradient(90deg,var(--copper),var(--teal),var(--copper));
   background-size:200% 100%;animation:shimmer 3s ease-in-out infinite;
 }
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @keyframes cardIn{from{opacity:0;transform:translateY(12px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 
 .proposal-card-header{display:flex;align-items:center;gap:14px;margin-bottom:var(--space-md);padding-bottom:var(--space-md);border-bottom:1px solid var(--border)}
@@ -441,8 +547,7 @@ body{
 .proposal-action-btn.secondary:hover{border-color:var(--border-copper);color:var(--copper-bright);background:var(--copper-glow)}
 .proposal-action-btn svg{width:16px;height:16px}
 
-/* ═══ TYPING — Terminal Processing ═══ */
-/* İTERASYON: 3 nokta → terminal processing satırı */
+/* ═══ TYPING ═══ */
 .typing{
   display:flex;gap:0;align-self:stretch;
   animation:msgIn 0.3s var(--ease-out);position:relative;z-index:1;
@@ -480,7 +585,7 @@ body{
 .typing-dots span:nth-child(4){animation-delay:0.36s}
 @keyframes termDash{0%,100%{opacity:0.15;transform:scaleX(1)}50%{opacity:1;transform:scaleX(1.5)}}
 
-/* ═══ INPUT AREA — Terminal ═══ */
+/* ═══ INPUT AREA ═══ */
 .input-area{
   padding:var(--space-md);border-top:1px solid var(--border);
   background:var(--bg-secondary);flex-shrink:0;position:relative;
@@ -541,7 +646,7 @@ body{
 .footer-note a{color:var(--text-2);text-decoration:none;transition:color 0.2s var(--ease-out)}
 .footer-note a:hover{color:var(--copper)}
 
-/* ═══ MSG SEPARATOR — Terminal ═══ */
+/* ═══ MSG SEPARATOR ═══ */
 .msg-separator{
   width:100%;height:0;
   border-top:1px dashed rgba(196,122,74,0.08);
@@ -570,7 +675,6 @@ body{
   .message{max-width:100%}
   .header-actions{gap:var(--space-sm)}
   .header-btn{padding:7px 14px;font-size:11px}
-  .horizon-ring{width:150px;height:150px}
   .header{padding:var(--space-md) var(--space-xl)}
   .input-area{padding:var(--space-lg) var(--space-xl)}
 }
@@ -580,6 +684,7 @@ body{
 }
 
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.hidden{display:none!important}
 </style>
 </head>
 <body>
@@ -588,13 +693,17 @@ body{
 
 <header class="header" role="banner">
   <div class="header-left">
-    <div class="logo-mark"><img src="logo.jpg" alt="Llull Lab logo" /></div>
+    <div class="logo-mark"><img src="logo.jpg" alt="Cedulor logo" /></div>
     <div class="header-title">
-      <h1>Llull Lab</h1>
-      <span>Horizon Europe Project Assistant</span>
+      <h1>Cedulor</h1>
+      <span>Project Support Machine</span>
     </div>
   </div>
   <div class="header-actions">
+    <span class="usage-badge hidden" id="usageBadge" aria-live="polite">
+      <span class="usage-dot" aria-hidden="true"></span>
+      <span id="usageText"></span>
+    </span>
     <button class="theme-toggle" id="themeToggle" aria-label="Switch to light mode">
       <svg id="themeIcon" viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
@@ -608,45 +717,93 @@ body{
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
       DOCX
     </button>
-    <div class="status-badge" aria-live="polite"><div class="status-dot" aria-hidden="true"></div>Online</div>
   </div>
 </header>
 
-<main class="conv-container" id="mainConv" role="log" aria-label="Conversation messages">
-  <div class="welcome" id="welcomeScreen">
-    <div class="horizon-ring" aria-hidden="true">
-      <div class="horizon-ring-outer"></div>
-      <div class="horizon-ring-inner"><div class="horizon-ring-stars">🇪🇺</div></div>
-      <div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div>
-    </div>
-    <h2>Your <em>Horizon</em> Begins Here</h2>
-    <p>Prepare your Horizon Europe proposal step by step. Share your project idea and I'll guide you through the full Part B application structure.</p>
-    <div class="welcome-hints" id="welcomeHints">
-      <button class="hint-chip" data-hint="I have a project idea">I have a project idea</button>
-      <button class="hint-chip" data-hint="Help me find the right call">Help me find the right call</button>
-      <button class="hint-chip" data-hint="I need to prepare a RIA proposal">I need to prepare a RIA proposal</button>
-    </div>
-  </div>
-</main>
+<!-- APP WRAPPER with gate overlay -->
+<div class="app-wrapper locked" id="appWrapper">
 
-<div class="input-area">
-  <div class="input-wrapper">
-    <span class="input-prompt" aria-hidden="true">you ›</span>
-    <label for="messageInput" class="sr-only">Type your message</label>
-    <textarea class="input-field" id="messageInput" placeholder="Type your message..." rows="1" aria-label="Message input"></textarea>
-    <button class="send-btn" id="sendBtn" aria-label="Send message">
-      <svg class="send-icon" viewBox="0 0 32 20" fill="none" aria-hidden="true">
-        <line x1="0" y1="16" x2="32" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-        <circle class="send-sun" cx="16" cy="12" r="4.5" fill="currentColor" opacity="0.9"/>
-        <line class="send-sun" x1="16" y1="5" x2="16" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <line class="send-sun" x1="10.2" y1="6.8" x2="11.5" y2="8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-        <line class="send-sun" x1="21.8" y1="6.8" x2="20.5" y2="8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-        <line class="send-sun" x1="8" y1="12" x2="10" y2="12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-        <line class="send-sun" x1="22" y1="12" x2="24" y2="12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-      </svg>
-    </button>
+  <!-- GATE OVERLAY -->
+  <div class="gate-overlay" id="gateOverlay">
+    <div class="gate-box">
+      <div class="gate-logo">
+        <div class="gate-logo-img"><img src="logo.jpg" alt="Cedulor" /></div>
+        <h2>Enter Cedulor</h2>
+        <p>Structured project support through combinatorial reasoning.</p>
+      </div>
+      <div class="gate-tabs-row">
+        <button class="gate-tab active" data-panel="code" type="button">I have an invite code</button>
+        <button class="gate-tab" data-panel="request" type="button">Request access</button>
+      </div>
+      <div class="gate-panel active" id="panelCode">
+        <input class="gate-input code-input" id="inviteCodeInput" type="text" placeholder="CDL-XXXX-XXXX" maxlength="14" autocomplete="off" spellcheck="false" aria-label="Invite code">
+        <button class="gate-btn" id="btnValidateCode" type="button"><span class="gate-btn-text">Validate Code</span><span class="gate-spinner" aria-hidden="true"></span></button>
+        <div class="gate-msg" id="codeFeedback"></div>
+      </div>
+      <div class="gate-panel" id="panelRequest">
+        <input class="gate-input" id="requestEmailInput" type="email" placeholder="your@email.com" autocomplete="email" aria-label="Email address">
+        <button class="gate-btn secondary" id="btnRequestAccess" type="button"><span class="gate-btn-text">Send Request</span><span class="gate-spinner" aria-hidden="true"></span></button>
+        <div class="gate-msg" id="requestFeedback"></div>
+        <p class="gate-hint">We'll review your request and send an invite code to your email.</p>
+      </div>
+    </div>
   </div>
-  <div class="footer-note">Built by <a href="https://www.llulllab.com" target="_blank" rel="noopener noreferrer">Llull Lab</a> · Paris</div>
+
+  <!-- EXHAUSTED OVERLAY -->
+  <div class="exhausted-overlay hidden" id="exhaustedOverlay">
+    <div class="exhausted-box">
+      <div class="exhausted-icon" aria-hidden="true">⏳</div>
+      <h3>No sessions left</h3>
+      <p>You've used all your available sessions. Request a new invite code to continue.</p>
+      <input class="gate-input" id="exhaustedEmailInput" type="email" placeholder="your@email.com" autocomplete="email" aria-label="Email for new access request">
+      <button class="gate-btn secondary" id="btnExhaustedRequest" type="button"><span class="gate-btn-text">Request New Access</span><span class="gate-spinner" aria-hidden="true"></span></button>
+      <div class="gate-msg" id="exhaustedFeedback"></div>
+    </div>
+  </div>
+
+  <!-- APP CONTENT -->
+  <div class="app-content">
+    <main class="conv-container" id="mainConv" role="log" aria-label="Conversation messages">
+      <div class="welcome" id="welcomeScreen">
+        <div class="welcome-logo"><img src="logo.jpg" alt="Cedulor" /></div>
+        <h2>Your <em>Project</em> Begins Here</h2>
+        <p>Prepare your EU-funded research proposal step by step. Select your programme, share your project idea, and Cedulor will guide you through the full application structure.</p>
+        <div class="welcome-programmes">
+          <span class="programme-tag">Horizon Europe</span>
+          <span class="programme-tag">MSCA</span>
+          <span class="programme-tag">ERC</span>
+          <span class="programme-tag">EIC Accelerator</span>
+        </div>
+        <div class="welcome-hints" id="welcomeHints">
+          <button class="hint-chip" data-hint="I have a Horizon Europe project idea">Horizon Europe proposal</button>
+          <button class="hint-chip" data-hint="Help me prepare an ERC application">ERC application</button>
+          <button class="hint-chip" data-hint="I need to draft an MSCA fellowship proposal">MSCA fellowship</button>
+          <button class="hint-chip" data-hint="I want to prepare an EIC Accelerator pitch">EIC Accelerator</button>
+        </div>
+      </div>
+    </main>
+
+    <div class="input-area">
+      <div class="input-wrapper">
+        <span class="input-prompt" aria-hidden="true">you ›</span>
+        <label for="messageInput" class="sr-only">Type your message</label>
+        <textarea class="input-field" id="messageInput" placeholder="Type your message..." rows="1" aria-label="Message input"></textarea>
+        <button class="send-btn" id="sendBtn" aria-label="Send message">
+          <svg class="send-icon" viewBox="0 0 32 20" fill="none" aria-hidden="true">
+            <line x1="0" y1="16" x2="32" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+            <circle class="send-sun" cx="16" cy="12" r="4.5" fill="currentColor" opacity="0.9"/>
+            <line class="send-sun" x1="16" y1="5" x2="16" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line class="send-sun" x1="10.2" y1="6.8" x2="11.5" y2="8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <line class="send-sun" x1="21.8" y1="6.8" x2="20.5" y2="8.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <line class="send-sun" x1="8" y1="12" x2="10" y2="12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <line class="send-sun" x1="22" y1="12" x2="24" y2="12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="footer-note">Built by <a href="https://www.llulllab.com" target="_blank" rel="noopener noreferrer">Llull Lab</a> · Paris</div>
+    </div>
+  </div>
+
 </div>
 
 <div class="toast error-toast" id="errorToast" role="alert"></div>
@@ -656,75 +813,216 @@ body{
 'use strict';
 
 (function(){
-  /* ── Token Guard ── */
-  var VALIDATE_URL='https://n8n.tropus.io/webhook/invite-validate';
-  var GATE_URL='gate.html';
-  var horizonToken=null;
-  try{horizonToken=sessionStorage.getItem('horizon-token')}catch(e){}
-  if(!horizonToken){window.location.href=GATE_URL;return}
+  /* ══════════════════════════════════════
+     CONFIG & ENDPOINTS
+     ══════════════════════════════════════ */
+  var API_BASE='https://n8n.tropus.io/webhook';
+  var ENDPOINTS={
+    chat:API_BASE+'/horizon',
+    validate:API_BASE+'/invite-validate',
+    request:API_BASE+'/horizon-access-request'
+  };
 
-  /* Async session validation — redirect if invalid */
-  (async function(){
-    try{
-      var res=await fetch(VALIDATE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:horizonToken})});
-      if(!res.ok){try{sessionStorage.removeItem('horizon-token')}catch(e){}window.location.href=GATE_URL}
-    }catch(e){/* network error — allow offline usage */}
-  })();
-
-  /* ── Config ── */
-  var CONFIG = {
-    webhookUrl:'https://n8n.tropus.io/webhook/horizon',
+  var CONFIG={
     sessionId:'session-'+(typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID().slice(0,12):Math.random().toString(36).substr(2,9)),
     apiKey:''
   };
 
   var isWaiting=false,lastBotRaw='',botMessageCount=0;
   var lastProposalData=null,lastDocxBase64=null,lastDocxFilename=null,lastMsgType=null;
+  var lineCounter=0;
 
-  /* ── Theme toggle ── */
+  /* ══════════════════════════════════════
+     GATE SYSTEM (ASGE/RJE pattern)
+     ══════════════════════════════════════ */
+  var appWrapper=document.getElementById('appWrapper');
+  var gateOverlay=document.getElementById('gateOverlay');
+  var exhaustedOverlay=document.getElementById('exhaustedOverlay');
+  var inviteCodeInput=document.getElementById('inviteCodeInput');
+  var btnValidateCode=document.getElementById('btnValidateCode');
+  var codeFeedback=document.getElementById('codeFeedback');
+  var requestEmailInput=document.getElementById('requestEmailInput');
+  var btnRequestAccess=document.getElementById('btnRequestAccess');
+  var requestFeedback=document.getElementById('requestFeedback');
+  var exhaustedEmailInput=document.getElementById('exhaustedEmailInput');
+  var btnExhaustedRequest=document.getElementById('btnExhaustedRequest');
+  var exhaustedFeedback=document.getElementById('exhaustedFeedback');
+  var usageBadge=document.getElementById('usageBadge');
+  var usageText=document.getElementById('usageText');
+
+  var sessionToken=null;
+  var remainingUses=0;
+  var lastMaxUses=0;
+
+  function saveToken(t){sessionToken=t;try{localStorage.setItem('cedulor_token',t)}catch(e){}}
+  function loadToken(){try{return localStorage.getItem('cedulor_token')}catch(e){return null}}
+  function clearToken(){sessionToken=null;try{localStorage.removeItem('cedulor_token')}catch(e){}}
+
+  function unlockInput(remaining,maxUses){
+    remainingUses=remaining;
+    appWrapper.classList.remove('locked');
+    gateOverlay.classList.add('hidden');
+    exhaustedOverlay.classList.add('hidden');
+    updateUsageBadge(remaining,maxUses);
+  }
+  function lockInput(){
+    appWrapper.classList.add('locked');
+    gateOverlay.classList.remove('hidden');
+    exhaustedOverlay.classList.add('hidden');
+    usageBadge.classList.add('hidden');
+    resetGateFeedback();
+  }
+  function showExhausted(){
+    appWrapper.classList.add('locked');
+    gateOverlay.classList.add('hidden');
+    exhaustedOverlay.classList.remove('hidden');
+    usageBadge.classList.add('hidden');
+    clearToken();
+  }
+  function updateUsageBadge(remaining,maxUses){
+    if(typeof remaining!=='number')return;
+    if(maxUses!=null)lastMaxUses=maxUses;
+    var display=lastMaxUses||'?';
+    usageText.textContent=remaining+' / '+display+' sessions left';
+    usageBadge.classList.remove('hidden','warning','depleted');
+    if(remaining<=0)usageBadge.classList.add('depleted');
+    else if(remaining===1)usageBadge.classList.add('warning');
+  }
+  function resetGateFeedback(){
+    [codeFeedback,requestFeedback,exhaustedFeedback].forEach(function(el){el.className='gate-msg';el.textContent=''});
+  }
+  function showGateFeedback(el,msg,type){el.className='gate-msg '+type;el.textContent=msg}
+  function setGateLoading(btn,loading){
+    if(loading){btn.classList.add('loading');btn.disabled=true}
+    else{btn.classList.remove('loading');btn.disabled=false}
+  }
+
+  /* Gate tabs */
+  var gateTabBtns=document.querySelectorAll('.gate-tab');
+  var gatePanelEls=document.querySelectorAll('.gate-panel');
+  gateTabBtns.forEach(function(tab){
+    tab.addEventListener('click',function(){
+      var panel=tab.dataset.panel;
+      gateTabBtns.forEach(function(t){t.classList.remove('active')});
+      gatePanelEls.forEach(function(p){p.classList.remove('active')});
+      tab.classList.add('active');
+      document.getElementById(panel==='code'?'panelCode':'panelRequest').classList.add('active');
+      resetGateFeedback();
+    });
+  });
+
+  /* Validate invite code */
+  btnValidateCode.addEventListener('click',async function(){
+    var code=inviteCodeInput.value.trim().toUpperCase();
+    if(!code){showGateFeedback(codeFeedback,'Please enter your invite code.','error');inviteCodeInput.focus();return}
+    setGateLoading(btnValidateCode,true);resetGateFeedback();
+    try{
+      var res=await fetch(ENDPOINTS.validate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invite_code:code})});
+      var data=await res.json();
+      if(res.ok&&data.token){
+        saveToken(data.token);
+        showGateFeedback(codeFeedback,'Access granted!','success');
+        setTimeout(function(){unlockInput(data.remaining_uses,data.max_uses)},600);
+      } else{
+        showGateFeedback(codeFeedback,data.message||'Invalid invite code.','error');
+      }
+    }catch(err){showGateFeedback(codeFeedback,'Connection error. Please try again.','error')}
+    finally{setGateLoading(btnValidateCode,false)}
+  });
+  inviteCodeInput.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();btnValidateCode.click()}});
+
+  /* Access request */
+  async function handleAccessRequest(emailInput,btn,feedbackEl){
+    var email=emailInput.value.trim();
+    if(!email||!email.includes('@')||!email.includes('.')){showGateFeedback(feedbackEl,'Please enter a valid email address.','error');emailInput.focus();return}
+    setGateLoading(btn,true);
+    try{
+      var res=await fetch(ENDPOINTS.request,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})});
+      var data=await res.json();
+      if(res.ok){showGateFeedback(feedbackEl,'Request received! Check your email for an invite code.','success');emailInput.value=''}
+      else{showGateFeedback(feedbackEl,data.message||'Something went wrong.','error')}
+    }catch(err){showGateFeedback(feedbackEl,'Connection error. Please try again.','error')}
+    finally{setGateLoading(btn,false)}
+  }
+  btnRequestAccess.addEventListener('click',function(){handleAccessRequest(requestEmailInput,btnRequestAccess,requestFeedback)});
+  requestEmailInput.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();btnRequestAccess.click()}});
+  btnExhaustedRequest.addEventListener('click',function(){handleAccessRequest(exhaustedEmailInput,btnExhaustedRequest,exhaustedFeedback)});
+  exhaustedEmailInput.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();btnExhaustedRequest.click()}});
+
+  /* Session check on load */
+  async function checkSession(){
+    var token=loadToken();
+    if(!token){lockInput();return}
+    sessionToken=token;
+    try{
+      var res=await fetch(ENDPOINTS.validate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token})});
+      var data=await res.json();
+      if(res.ok&&typeof data.remaining_uses==='number'&&data.remaining_uses>0){unlockInput(data.remaining_uses,data.max_uses)}
+      else if(res.ok&&typeof data.remaining_uses==='number'&&data.remaining_uses<=0){showExhausted()}
+      else{clearToken();lockInput()}
+    }catch(err){clearToken();lockInput()}
+  }
+  checkSession();
+
+  async function refreshUsage(){
+    if(!sessionToken)return;
+    try{
+      var res=await fetch(ENDPOINTS.validate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:sessionToken})});
+      var data=await res.json();
+      if(res.ok){remainingUses=data.remaining_uses;updateUsageBadge(data.remaining_uses,data.max_uses);if(data.remaining_uses<=0)showExhausted()}
+    }catch(e){}
+  }
+
+  /* ══════════════════════════════════════
+     THEME TOGGLE
+     ══════════════════════════════════════ */
   var MOON_SVG='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
   var SUN_SVG='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
   var themeToggle=document.getElementById('themeToggle');
   var themeIcon=document.getElementById('themeIcon');
   var savedTheme=null;
-  try{savedTheme=localStorage.getItem('horizon-theme')}catch(e){}
+  try{savedTheme=localStorage.getItem('cedulor-theme')}catch(e){}
   var currentTheme=savedTheme||'dark';
 
   function applyTheme(t){
-    currentTheme=t;document.documentElement.setAttribute('data-theme',t);
-    try{localStorage.setItem('horizon-theme',t)}catch(e){}
+    currentTheme=t;
+    document.documentElement.setAttribute('data-theme',t);
+    try{localStorage.setItem('cedulor-theme',t)}catch(e){}
     if(t==='dark'){themeIcon.innerHTML=MOON_SVG;themeToggle.setAttribute('aria-label','Switch to light mode')}
     else{themeIcon.innerHTML=SUN_SVG;themeToggle.setAttribute('aria-label','Switch to dark mode')}
   }
   themeToggle.addEventListener('click',function(){applyTheme(currentTheme==='dark'?'light':'dark')});
   applyTheme(currentTheme);
 
-  /* ── DOM ── */
+  /* ══════════════════════════════════════
+     DOM REFERENCES
+     ══════════════════════════════════════ */
   var messageInput=document.getElementById('messageInput');
   var sendBtn=document.getElementById('sendBtn');
   var container=document.getElementById('mainConv');
 
-  /* ── Event listeners (no inline onclick) ── */
   document.getElementById('newSessionBtn').addEventListener('click',newSession);
   document.getElementById('docxBtn').addEventListener('click',downloadDOCX);
   sendBtn.addEventListener('click',sendMessage);
   messageInput.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
   messageInput.addEventListener('input',function(){autoResize(messageInput)});
 
-  /* Hint chips — delegated */
+  /* Hint chips */
   document.addEventListener('click',function(e){
     var chip=e.target.closest('.hint-chip[data-hint]');
     if(chip){messageInput.value=chip.getAttribute('data-hint');sendMessage()}
   });
 
-  /* ── Functions ── */
+  /* ══════════════════════════════════════
+     FUNCTIONS
+     ══════════════════════════════════════ */
   function newSession(){
     if(isWaiting)return;
     CONFIG.sessionId='session-'+Math.random().toString(36).substr(2,9)+Date.now().toString(36).substr(-4);
     lastProposalData=null;lastDocxBase64=null;lastDocxFilename=null;
     lastBotRaw='';botMessageCount=0;lastMsgType=null;lineCounter=0;
     document.getElementById('docxBtn').classList.remove('visible');
-    container.innerHTML='<div class="welcome" id="welcomeScreen"><div class="horizon-ring" aria-hidden="true"><div class="horizon-ring-outer"></div><div class="horizon-ring-inner"><div class="horizon-ring-stars">🇪🇺</div></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div><div class="ring-particle"></div></div><h2>Your <em>Horizon</em> Begins Here</h2><p>Prepare your Horizon Europe proposal step by step. Share your project idea and I\'ll guide you through the full Part B application structure.</p><div class="welcome-hints" id="welcomeHints"><button class="hint-chip" data-hint="I have a project idea">I have a project idea</button><button class="hint-chip" data-hint="Help me find the right call">Help me find the right call</button><button class="hint-chip" data-hint="I need to prepare a RIA proposal">I need to prepare a RIA proposal</button></div></div>';
+    container.innerHTML='<div class="welcome" id="welcomeScreen"><div class="welcome-logo"><img src="logo.jpg" alt="Cedulor" /></div><h2>Your <em>Project</em> Begins Here</h2><p>Prepare your EU-funded research proposal step by step. Select your programme, share your project idea, and Cedulor will guide you through the full application structure.</p><div class="welcome-programmes"><span class="programme-tag">Horizon Europe</span><span class="programme-tag">MSCA</span><span class="programme-tag">ERC</span><span class="programme-tag">EIC Accelerator</span></div><div class="welcome-hints" id="welcomeHints"><button class="hint-chip" data-hint="I have a Horizon Europe project idea">Horizon Europe proposal</button><button class="hint-chip" data-hint="Help me prepare an ERC application">ERC application</button><button class="hint-chip" data-hint="I need to draft an MSCA fellowship proposal">MSCA fellowship</button><button class="hint-chip" data-hint="I want to prepare an EIC Accelerator pitch">EIC Accelerator</button></div></div>';
     showSuccess('New session started.');
   }
 
@@ -772,9 +1070,6 @@ body{
     if(e.target.closest('#dlJson'))downloadJSON();
   });
 
-  /* İTERASYON: Terminal satır sayacı */
-  var lineCounter=0;
-
   function addMessage(content,type,proposalData){
     var welcome=document.getElementById('welcomeScreen');
     if(welcome)welcome.remove();
@@ -784,7 +1079,7 @@ body{
     }
     lineCounter++;
     var msg=document.createElement('div');msg.className='message '+type;
-    var prefix=type==='bot'?'horizon ›':'you ›';
+    var prefix=type==='bot'?'cedulor ›':'you ›';
     var lineNum=String(lineCounter).padStart(3,'0');
     var parsedContent;
     if(type==='bot'){parsedContent=parseMarkdown(content);if(proposalData)parsedContent+=buildProposalCard(proposalData)}
@@ -798,7 +1093,7 @@ body{
   function showTyping(){
     var typing=document.createElement('div');typing.className='typing';typing.id='typingIndicator';
     var nextLine=String(lineCounter+1).padStart(3,'0');
-    typing.innerHTML='<div class="msg-line-num" aria-hidden="true">'+nextLine+'</div><div class="msg-prefix">horizon ›</div><span class="typing-label">processing</span><div class="typing-dots" aria-label="Assistant is typing"><span></span><span></span><span></span><span></span></div>';
+    typing.innerHTML='<div class="msg-line-num" aria-hidden="true">'+nextLine+'</div><div class="msg-prefix">cedulor ›</div><span class="typing-label">processing</span><div class="typing-dots" aria-label="Assistant is typing"><span></span><span></span><span></span><span></span></div>';
     container.appendChild(typing);container.scrollTop=container.scrollHeight;
   }
   function hideTyping(){var el=document.getElementById('typingIndicator');if(el)el.remove()}
@@ -807,6 +1102,9 @@ body{
   function showSuccess(msg){var t=document.getElementById('successToast');if(!t)return;t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none'},3000)}
 
   async function sendMessage(){
+    if(!sessionToken){showError('Please enter a valid invitation code.');return}
+    if(remainingUses<=0){showExhausted();return}
+
     var text=messageInput.value.trim();
     if(!text||isWaiting)return;
     addMessage(text,'user');messageInput.value='';messageInput.style.height='auto';
@@ -815,18 +1113,23 @@ body{
     try{
       var headers={'Content-Type':'application/json'};
       if(CONFIG.apiKey)headers['x-api-key']=CONFIG.apiKey;
-      var res=await fetch(CONFIG.webhookUrl,{method:'POST',headers:headers,body:JSON.stringify({message:text,session_id:CONFIG.sessionId,token:horizonToken})});
+      var res=await fetch(ENDPOINTS.chat,{method:'POST',headers:headers,body:JSON.stringify({message:text,session_id:CONFIG.sessionId,token:sessionToken})});
       hideTyping();
-      if(res.status===401){try{sessionStorage.removeItem('horizon-token')}catch(e){}window.location.href=GATE_URL;return}
+      if(res.status===401){clearToken();lockInput();return}
       if(!res.ok)throw new Error('Server error ('+res.status+')');
       var rawText=await res.text();var data;
       try{data=JSON.parse(rawText)}catch(e){data=null}
 
       if(data&&data.type==='proposal_complete'){
         lastProposalData=data.proposal_json;lastDocxBase64=data.docx_base64;
-        lastDocxFilename=data.filename||'Horizon_PartB_Draft.docx';
+        lastDocxFilename=data.filename||'Cedulor_PartB_Draft.docx';
         document.getElementById('docxBtn').classList.add('visible');
         addMessage(data.message||'Your proposal draft is ready.','bot',lastProposalData);
+        /* Decrement locally then sync */
+        remainingUses=Math.max(0,remainingUses-1);
+        updateUsageBadge(remainingUses,null);
+        if(remainingUses<=0){showExhausted();return}
+        await refreshUsage();
       }else if(data&&data.proposal_json&&!data.docx_base64){
         lastProposalData=data.proposal_json;
         addMessage(data.message||data.conversation_text||'Your structured proposal data is ready.','bot',lastProposalData);
