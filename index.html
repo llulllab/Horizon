@@ -514,6 +514,8 @@ body{
   display:flex;flex-direction:column;gap:var(--space-md);
   scroll-behavior:smooth;position:relative;z-index:1;
 }
+/* When welcome is mini, don't center-justify — start from top */
+.conv-container:has(.welcome.mini){justify-content:flex-start}
 
 /* ═══ WELCOME ═══ */
 .welcome{
@@ -584,6 +586,82 @@ body{
   background:var(--bg-linen);
 }
 .piano-key:nth-child(odd){margin-top:4px}
+
+/* ═══ WELCOME MINI — collapsed state after first message ═══ */
+.welcome.mini{
+  flex:none;gap:0;padding:var(--space-md) 0 var(--space-sm);
+  animation:welcomeShrink 0.5s var(--ease-out);
+  align-items:flex-start;text-align:left;
+  max-width:780px;width:100%;margin:0 auto;
+}
+@keyframes welcomeShrink{
+  from{padding:var(--space-2xl) 0;gap:var(--space-lg)}
+  to{padding:var(--space-md) 0 var(--space-sm);gap:0}
+}
+.welcome.mini .welcome-logo{display:none}
+.welcome.mini h2{
+  font-size:clamp(1rem,2.5vw,1.3rem);
+  margin-bottom:2px;
+}
+.welcome.mini .welcome-barline{width:80px;margin:var(--space-xs) 0}
+.welcome.mini p{
+  font-size:12px;max-width:520px;line-height:1.6;margin-bottom:0;
+}
+.welcome.mini .piano-keys{display:none}
+.welcome.mini .welcome-hints{
+  display:flex;margin-top:var(--space-sm);justify-content:flex-start;
+}
+.welcome.mini .hint-chip{
+  padding:6px 14px;font-size:10px;min-height:32px;
+}
+
+/* ═══ CONTEXT SIDEBAR — desktop only ═══ */
+.app-content{display:flex;flex-direction:column;flex:1;overflow:hidden;position:relative}
+
+@media(min-width:1080px){
+  .app-content{flex-direction:row}
+  .conv-column{display:flex;flex-direction:column;flex:1;overflow:hidden;min-width:0}
+  .context-sidebar{
+    width:280px;flex-shrink:0;
+    border-left:1px solid var(--border);
+    background:var(--bg-warm);
+    overflow-y:auto;padding:var(--space-lg);
+    display:flex;flex-direction:column;gap:var(--space-lg);
+  }
+  .context-sidebar.empty{display:flex}
+}
+@media(max-width:1079px){
+  .context-sidebar{display:none}
+  .conv-column{display:contents}
+}
+
+.sidebar-section{display:flex;flex-direction:column;gap:var(--space-sm)}
+.sidebar-section-label{
+  font-size:8px;font-weight:700;text-transform:uppercase;
+  letter-spacing:0.12em;color:var(--gold-dim);
+}
+.sidebar-programme{
+  font-family:var(--font-display);font-size:15px;font-weight:500;
+  color:var(--text-heading);
+}
+.sidebar-item{
+  font-size:11px;color:var(--text-2);line-height:1.6;
+  padding:8px 12px;background:var(--bg-ivory);
+  border:1px solid var(--border);border-radius:var(--r);
+}
+.sidebar-item strong{color:var(--text-heading);font-weight:600;display:block;font-size:10px;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px}
+.sidebar-empty{
+  font-size:11px;color:var(--text-3);font-style:italic;line-height:1.6;
+}
+.sidebar-checklist{list-style:none;padding:0;margin:0}
+.sidebar-checklist li{
+  font-size:11px;color:var(--text-3);padding:4px 0;
+  display:flex;align-items:center;gap:6px;
+  border-bottom:1px solid var(--border);
+}
+.sidebar-checklist li:last-child{border-bottom:none}
+.sidebar-checklist li.done{color:var(--success)}
+.sidebar-check{font-size:10px;width:14px;text-align:center;flex-shrink:0}
 
 /* ═══ HINT CHIPS ═══ */
 .welcome-hints{
@@ -1005,6 +1083,10 @@ body{
 @media(min-width:1024px){
   .piano-key{width:104px}
 }
+/* sidebar layout override — conv-column takes input-area with it */
+@media(min-width:1080px){
+  .conv-container{padding:var(--space-lg) var(--space-xl)}
+}
 
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .hidden{display:none!important}
@@ -1112,6 +1194,7 @@ body{
 
   <!-- APP CONTENT -->
   <div class="app-content">
+    <div class="conv-column">
     <main class="conv-container" id="mainConv" role="log" aria-label="Conversation messages">
       <div class="welcome" id="welcomeScreen">
         <div class="welcome-logo"><img src="logo.jpg" alt="Cedulor" /></div>
@@ -1148,6 +1231,34 @@ body{
       </div>
       <div class="footer-note">Built by <a href="https://www.llulllab.com" target="_blank" rel="noopener noreferrer">Llull Lab</a></div>
     </div>
+    </div>
+
+    <!-- CONTEXT SIDEBAR — desktop only -->
+    <aside class="context-sidebar" id="contextSidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Programme</div>
+        <div class="sidebar-programme" id="sidebarProgramme">Not yet selected</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Collected Information</div>
+        <ul class="sidebar-checklist" id="sidebarChecklist">
+          <li id="sc1"><span class="sidebar-check">&middot;</span>Project basics</li>
+          <li id="sc2"><span class="sidebar-check">&middot;</span>Scientific content</li>
+          <li id="sc3"><span class="sidebar-check">&middot;</span>Impact strategy</li>
+          <li id="sc4"><span class="sidebar-check">&middot;</span>Consortium</li>
+          <li id="sc5"><span class="sidebar-check">&middot;</span>Implementation</li>
+        </ul>
+      </div>
+      <div class="sidebar-section" id="sidebarDetails">
+        <div class="sidebar-section-label">Project Details</div>
+        <div class="sidebar-empty" id="sidebarEmpty">Details will appear here as you share information about your project.</div>
+        <div id="sidebarItems"></div>
+      </div>
+      <div class="sidebar-section" style="margin-top:auto;padding-top:var(--space-md);border-top:1px solid var(--border)">
+        <div class="sidebar-section-label">Supported Programmes</div>
+        <div style="font-size:10px;color:var(--text-3);line-height:1.7">Horizon Europe (RIA, IA, CSA), MSCA Doctoral Networks &amp; Postdoctoral Fellowships, ERC Starting / Consolidator / Advanced, EIC Accelerator</div>
+      </div>
+    </aside>
   </div>
 
 </div>
@@ -1457,6 +1568,69 @@ body{
   }
 
   /* ══════════════════════════════════════
+     SIDEBAR HELPERS
+     ══════════════════════════════════════ */
+  var detectedProgramme='';
+
+  function detectProgramme(text){
+    if(!text||detectedProgramme)return;
+    var lower=text.toLowerCase();
+    var programmes=[
+      {keys:['horizon europe','ria','ia ','csa','cluster','pillar'],name:'Horizon Europe'},
+      {keys:['msca','marie','doctoral network','postdoctoral fellowship'],name:'MSCA'},
+      {keys:['erc','starting grant','consolidator','advanced grant','frontier research'],name:'ERC'},
+      {keys:['eic','accelerator','pathfinder'],name:'EIC'}
+    ];
+    for(var i=0;i<programmes.length;i++){
+      for(var j=0;j<programmes[i].keys.length;j++){
+        if(lower.indexOf(programmes[i].keys[j])!==-1){
+          detectedProgramme=programmes[i].name;
+          var el=document.getElementById('sidebarProgramme');
+          if(el)el.textContent=detectedProgramme;
+          return;
+        }
+      }
+    }
+  }
+
+  function updateSidebarChecklist(){
+    for(var i=1;i<=5;i++){
+      var li=document.getElementById('sc'+i);
+      if(!li)continue;
+      var check=li.querySelector('.sidebar-check');
+      if(i<currentStep){
+        li.classList.add('done');
+        if(check)check.textContent='\u2713';
+      }else if(i===currentStep){
+        li.classList.remove('done');
+        if(check)check.innerHTML='<span style="color:var(--gold)">\u25B8</span>';
+      }else{
+        li.classList.remove('done');
+        if(check)check.textContent='\u00B7';
+      }
+    }
+    var emptyEl=document.getElementById('sidebarEmpty');
+    if(emptyEl&&currentStep>0)emptyEl.style.display='none';
+  }
+
+  function resetSidebar(){
+    detectedProgramme='';
+    var el=document.getElementById('sidebarProgramme');
+    if(el)el.textContent='Not yet selected';
+    var emptyEl=document.getElementById('sidebarEmpty');
+    if(emptyEl)emptyEl.style.display='';
+    var items=document.getElementById('sidebarItems');
+    if(items)items.innerHTML='';
+    for(var i=1;i<=5;i++){
+      var li=document.getElementById('sc'+i);
+      if(!li)continue;
+      li.classList.remove('done');
+      var check=li.querySelector('.sidebar-check');
+      if(check)check.textContent='\u00B7';
+    }
+  }
+
+  /* ══════════════════════════════════════
      FUNCTIONS
      ══════════════════════════════════════ */
   function newSession(){
@@ -1466,6 +1640,7 @@ body{
     lastBotRaw='';botMessageCount=0;
     document.getElementById('docxBtn').classList.remove('visible');
     resetProgress();
+    resetSidebar();
     container.innerHTML='<div class="welcome" id="welcomeScreen"><div class="welcome-logo"><img src="logo.jpg" alt="Cedulor" /></div><h2>Your <em>Proposal</em> Begins Here</h2><div class="welcome-barline" aria-hidden="true"></div><p>Prepare your EU-funded research proposal step by step. Select your programme, share your project idea, and Cedulor will guide you through the full application structure.</p><div class="piano-keys" aria-label="Supported EU programmes"><div class="piano-key">Horizon Europe</div><div class="piano-key">MSCA</div><div class="piano-key">ERC</div><div class="piano-key">EIC Accel.</div></div><div class="welcome-hints" id="welcomeHints"><button class="hint-chip" data-hint="I have a Horizon Europe project idea">Horizon Europe proposal</button><button class="hint-chip" data-hint="Help me prepare an ERC application">ERC application</button><button class="hint-chip" data-hint="I need to draft an MSCA fellowship proposal">MSCA fellowship</button><button class="hint-chip" data-hint="I want to prepare an EIC Accelerator pitch">EIC Accelerator</button></div></div>';
     showSuccess('New session started.');
   }
@@ -1684,7 +1859,11 @@ body{
 
   function addMessage(content,type,proposalData){
     var welcome=document.getElementById('welcomeScreen');
-    if(welcome)welcome.remove();
+    if(welcome&&!welcome.classList.contains('mini')){
+      welcome.classList.add('mini');
+      /* ① Activate step 1 on first message */
+      if(currentStep===0)setProgressStep(1);
+    }
     var msg=document.createElement('div');
     msg.className='message '+type;
     var avatarText=type==='bot'?'C':'Y';
@@ -1702,7 +1881,14 @@ body{
       lastBotRaw=content;botMessageCount++;
       /* ① detect progress from bot responses */
       detectStep(content);
+      /* sidebar: detect programme */
+      detectProgramme(content);
     }
+    if(type==='user'){
+      detectProgramme(content);
+    }
+    /* sidebar: update checklist based on current step */
+    updateSidebarChecklist();
   }
 
   function showTyping(){
