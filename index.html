@@ -5,6 +5,7 @@
   ══════════════════════════════════════════════════════
   CEDULOR — Project Support Machine
   Horizon Europe Proposal Preparation Assistant
+  v2 — Structural Upgrade (6 enhancements)
   ══════════════════════════════════════════════════════
 
   1. KİŞİLİK — Den Haag'da bir kanal evinin üst katında,
@@ -30,6 +31,14 @@
      çizgi grupları (barline). Arka plan tonu aynı fildişi
      ailesinde nüans kayıyor. Boşluklar milimetrik eşit.
      Kontrollü, öngörülebilir, bir Chopin noktürnü gibi.
+
+  ── v2 UPGRADES ──
+  ① Proposal Progress Tracker (sticky, step-based)
+  ② Section Depth Cards (grid, per-section completeness)
+  ③ Consortium Partner Chips + WP Gantt Timeline
+  ④ Completeness Ring + Budget Donut
+  ⑤ Generation Deliberation Overlay
+  ⑥ Review Score Card (Opus agent output)
   ══════════════════════════════════════════════════════
 -->
 <meta charset="UTF-8">
@@ -188,7 +197,6 @@ body{
   background:var(--bg-ivory);
   flex-shrink:0;position:relative;z-index:10;
 }
-/* Barline ayraç — çift çizgi */
 .header::after{
   content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
   background:
@@ -260,6 +268,38 @@ body{
 .usage-badge.depleted .usage-dot{background:var(--error)}
 
 /* ═══════════════════════════════
+   ① PROGRESS TRACKER
+   ═══════════════════════════════ */
+.progress-tracker{
+  display:none;flex-shrink:0;
+  padding:0 var(--space-lg);
+  background:var(--bg-ivory);
+  border-bottom:1px solid var(--border);
+  position:relative;z-index:9;
+}
+.progress-tracker.visible{display:block}
+.progress-tracker-inner{
+  display:flex;gap:0;max-width:780px;margin:0 auto;
+}
+.progress-step{
+  flex:1;padding:10px 6px;text-align:center;position:relative;
+  font-size:9px;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.06em;color:var(--text-3);
+  transition:color 0.3s var(--ease),background 0.3s var(--ease);
+  cursor:default;border-bottom:2px solid transparent;
+}
+.progress-step .step-num{
+  display:block;font-family:var(--font-display);font-size:14px;
+  font-weight:500;margin-bottom:1px;color:var(--text-3);
+  transition:color 0.3s var(--ease);
+}
+.progress-step.done{color:var(--success);border-bottom-color:var(--success)}
+.progress-step.done .step-num{color:var(--success)}
+.progress-step.done .step-num::after{content:' \2713';font-size:10px}
+.progress-step.active{color:var(--gold);border-bottom-color:var(--gold)}
+.progress-step.active .step-num{color:var(--gold)}
+
+/* ═══════════════════════════════
    APP WRAPPER + GATE
    ═══════════════════════════════ */
 .app-wrapper{
@@ -267,6 +307,7 @@ body{
   position:relative;overflow:hidden;
 }
 .app-wrapper.locked .app-content{filter:blur(6px);pointer-events:none;user-select:none;opacity:0.4}
+.app-wrapper.locked .progress-tracker{filter:blur(6px);pointer-events:none;opacity:0.4}
 .app-content{display:flex;flex-direction:column;flex:1;overflow:hidden}
 
 /* ═══ GATE OVERLAY ═══ */
@@ -292,7 +333,6 @@ body{
 }
 [data-theme="dark"] .gate-box{box-shadow:0 24px 80px rgba(0,0,0,0.35),0 2px 8px rgba(0,0,0,0.2)}
 
-/* Barline üst kenar — ince çift çizgi */
 .gate-box::before{
   content:'';position:absolute;top:0;left:40px;right:40px;height:3px;
   background:
@@ -424,13 +464,55 @@ body{
 .exhausted-box p{font-size:0.8rem;color:var(--text-2);margin-bottom:var(--space-lg);line-height:1.7}
 
 /* ═══════════════════════════════
+   ⑤ GENERATION OVERLAY
+   ═══════════════════════════════ */
+.gen-overlay{
+  position:absolute;inset:0;z-index:15;
+  display:flex;align-items:center;justify-content:center;
+  padding:var(--space-lg);
+  background:rgba(242,236,224,0.85);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+[data-theme="dark"] .gen-overlay{background:rgba(17,24,32,0.85)}
+.gen-overlay.hidden{display:none}
+
+.gen-box{text-align:center;max-width:420px;animation:gateIn 0.5s var(--ease-out)}
+
+.gen-ring{
+  width:80px;height:80px;margin:0 auto 20px;border-radius:50%;
+  border:3px solid var(--border-mid);
+  border-top-color:var(--gold);border-right-color:var(--gold-dim);
+  animation:genSpin 1.8s linear infinite;
+}
+@keyframes genSpin{to{transform:rotate(360deg)}}
+
+.gen-title{
+  font-family:var(--font-display);font-size:1.2rem;font-weight:500;
+  font-style:italic;color:var(--gold);margin-bottom:6px;
+}
+.gen-sub{font-size:12px;color:var(--text-3);margin-bottom:24px;line-height:1.6}
+
+.gen-steps{display:flex;justify-content:center;gap:20px;flex-wrap:wrap}
+.gen-step{text-align:center;min-width:52px}
+.gen-step-icon{
+  width:34px;height:34px;border-radius:50%;margin:0 auto 4px;
+  border:2px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:11px;background:var(--bg-warm);color:var(--text-3);
+  transition:all 0.4s var(--ease);
+}
+.gen-step-icon.active{border-color:var(--gold);color:var(--gold);animation:genPulse 1.5s ease-in-out infinite}
+.gen-step-icon.done{border-color:var(--success);color:var(--success);background:rgba(58,122,74,0.06);animation:none}
+@keyframes genPulse{0%,100%{box-shadow:0 0 0 0 rgba(138,116,48,0.15)}50%{box-shadow:0 0 14px 4px rgba(138,116,48,0.1)}}
+.gen-step-label{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-3)}
+
+/* ═══════════════════════════════
    CONVERSATION AREA
    ═══════════════════════════════ */
 .conv-container{
   flex:1;overflow-y:auto;
   padding:var(--space-lg) var(--space-lg);
   display:flex;flex-direction:column;gap:var(--space-md);
-  scroll-behavior:smooth;position:relative;
+  scroll-behavior:smooth;position:relative;z-index:1;
 }
 
 /* ═══ WELCOME ═══ */
@@ -455,7 +537,6 @@ body{
 }
 .welcome h2 em{font-style:italic;color:var(--gold)}
 
-/* Barline ayraç — welcome içinde */
 .welcome-barline{
   width:180px;height:3px;margin:var(--space-xs) auto;
   background:
@@ -471,7 +552,7 @@ body{
   max-width:460px;line-height:1.8;
 }
 
-/* ═══ PIANO KEYS — Programme Tags ═══ */
+/* ═══ PIANO KEYS ═══ */
 .piano-keys{
   display:flex;gap:0;justify-content:center;
   margin-top:var(--space-md);perspective:600px;
@@ -594,14 +675,15 @@ body{
   background:linear-gradient(to bottom,var(--border-mid) 0,var(--border-mid) 1px,transparent 1px,transparent 2px,var(--border-mid) 2px,var(--border-mid) 3px);
 }
 
-/* ═══ PROPOSAL CARD ═══ */
+/* ═══════════════════════════════
+   ② PROPOSAL CARD (enhanced)
+   ═══════════════════════════════ */
 .proposal-card{
   background:var(--bg-ivory);
   border:1px solid var(--border-mid);border-radius:var(--r-lg);
   padding:var(--space-lg);margin-top:var(--space-md);
   animation:cardIn 0.6s var(--ease-out);position:relative;overflow:hidden;
 }
-/* Altın ölçü çizgisi — partisyon referansı */
 .proposal-card::before{
   content:'';position:absolute;top:0;left:24px;right:24px;height:2px;
   background:linear-gradient(90deg,transparent,var(--gold) 20%,var(--gold) 80%,transparent);
@@ -649,16 +731,146 @@ body{
   font-family:var(--font-display);
 }
 
-.proposal-sections{display:flex;flex-direction:column;gap:4px;margin-bottom:var(--space-lg)}
-.proposal-section-row{
-  display:flex;align-items:center;gap:10px;padding:10px 14px;
-  background:var(--bg-warm);border-radius:var(--r);font-size:12.5px;
-  color:var(--text-2);border:1px solid transparent;
-  transition:border-color 0.2s var(--ease),background 0.2s var(--ease);
+/* ④ Completeness + Budget row */
+.proposal-stats-row{
+  display:flex;gap:var(--space-lg);align-items:center;flex-wrap:wrap;
+  margin-bottom:var(--space-lg);padding-bottom:var(--space-lg);
+  border-bottom:1px solid var(--border);
 }
-.proposal-section-row:hover{border-color:var(--border);background:var(--bg-linen)}
-.proposal-section-row .check{color:var(--success);font-weight:700;font-size:13px}
+.completeness-group{display:flex;align-items:center;gap:14px}
+.completeness-ring{position:relative;width:56px;height:56px;flex-shrink:0}
+.completeness-ring svg{width:56px;height:56px;transform:rotate(-90deg)}
+.completeness-ring .ring-bg{fill:none;stroke:var(--border-mid);stroke-width:4}
+.completeness-ring .ring-fill{fill:none;stroke:var(--success);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset 0.8s var(--ease)}
+.completeness-ring .ring-text{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:14px;font-weight:500;color:var(--text-heading);
+}
+.completeness-info{font-size:11px;color:var(--text-2);line-height:1.5}
+.completeness-info strong{display:block;font-family:var(--font-display);font-size:13px;color:var(--text-heading);font-weight:500}
 
+.budget-group{display:flex;align-items:center;gap:14px;margin-left:auto}
+.budget-donut{position:relative;width:56px;height:56px;flex-shrink:0}
+.budget-donut svg{width:56px;height:56px;transform:rotate(-90deg)}
+.budget-donut .donut-segment{fill:none;stroke-width:6;transition:stroke-dashoffset 0.6s var(--ease)}
+.budget-donut .donut-text{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:10px;font-weight:500;color:var(--text-heading);
+}
+.budget-legend{display:flex;flex-direction:column;gap:3px}
+.budget-legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text-2)}
+.budget-legend-dot{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+
+/* ② Section depth cards */
+.depth-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:var(--space-lg)}
+@media(max-width:600px){.depth-grid{grid-template-columns:1fr}}
+
+.depth-card{
+  background:var(--bg-warm);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px;position:relative;overflow:hidden;
+  transition:border-color 0.2s var(--ease),transform 0.2s var(--ease);
+  cursor:default;
+}
+.depth-card:hover{border-color:var(--border-gold);transform:translateY(-2px)}
+.depth-card::before{
+  content:'';position:absolute;top:0;left:14px;right:14px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold-dim) 30%,var(--gold-dim) 70%,transparent);
+  opacity:0.5;
+}
+.depth-card-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:var(--gold-dim);margin-bottom:6px}
+.depth-card-title{font-family:var(--font-display);font-size:14px;font-weight:500;color:var(--text-heading);margin-bottom:4px}
+.depth-card-status{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.depth-card-status.complete{color:var(--success)}
+.depth-card-status.partial{color:var(--gold)}
+.depth-card-status.pending{color:var(--text-3)}
+.depth-card-bar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+.depth-card-bar-fill{height:100%;border-radius:2px;transition:width 0.6s var(--ease)}
+.depth-card-bar-fill.full{background:var(--success)}
+.depth-card-bar-fill.mid{background:var(--gold)}
+.depth-card-bar-fill.low{background:var(--border-mid)}
+
+/* ③ Consortium chips */
+.consortium-section{margin-bottom:var(--space-lg)}
+.consortium-section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:var(--gold-dim);margin-bottom:8px}
+.consortium-row{display:flex;gap:8px;flex-wrap:wrap}
+.partner-chip{
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg-warm);border:1px solid var(--border);border-radius:var(--r);
+  padding:8px 12px;transition:border-color 0.2s var(--ease);
+}
+.partner-chip:hover{border-color:var(--border-gold)}
+.partner-flag{
+  width:22px;height:16px;border-radius:2px;background:var(--bg-linen);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;color:var(--text-3);font-weight:700;flex-shrink:0;
+}
+.partner-name{font-size:11px;font-weight:600;color:var(--text-heading)}
+.partner-type{font-size:9px;color:var(--text-3)}
+.partner-role-badge{
+  font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;
+  color:var(--gold);padding:2px 7px;background:var(--gold-ghost);border-radius:3px;
+  margin-left:4px;white-space:nowrap;
+}
+
+/* ③ WP Timeline */
+.wp-timeline-section{margin-bottom:var(--space-lg)}
+.wp-timeline-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:var(--gold-dim);margin-bottom:8px}
+.wp-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border)}
+.wp-row:last-child{border-bottom:none}
+.wp-row-label{width:90px;font-size:10px;font-weight:600;color:var(--text-heading);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wp-bar-track{flex:1;height:16px;background:var(--bg-ivory);border-radius:3px;position:relative;border:1px solid var(--border);overflow:hidden}
+.wp-bar{
+  position:absolute;top:2px;bottom:2px;border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:7px;font-weight:700;color:var(--bg-ivory);letter-spacing:0.03em;
+  transition:left 0.4s var(--ease),width 0.4s var(--ease);
+}
+.wp-months-row{display:flex;justify-content:space-between;font-size:8px;color:var(--text-3);padding:4px 100px 0}
+
+/* WP bar colors */
+.wp-bar.c0{background:var(--ink)}
+.wp-bar.c1{background:var(--gold)}
+.wp-bar.c2{background:var(--wine)}
+.wp-bar.c3{background:var(--ink-muted)}
+.wp-bar.c4{background:var(--success)}
+.wp-bar.c5{background:var(--gold-dim)}
+.wp-bar.c6{background:var(--stone)}
+
+/* ⑥ Review Score Card */
+.review-card{
+  background:var(--bg-warm);border:1px solid var(--border);border-radius:var(--r);
+  padding:var(--space-lg);margin-bottom:var(--space-md);
+  position:relative;overflow:hidden;
+}
+.review-card::before{
+  content:'';position:absolute;top:0;left:var(--space-lg);right:var(--space-lg);height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold) 20%,var(--gold) 80%,transparent);
+}
+.review-header{display:flex;align-items:flex-start;gap:var(--space-lg);flex-wrap:wrap}
+.review-score{text-align:center;flex-shrink:0}
+.review-score-num{font-family:var(--font-display);font-size:2rem;font-weight:500;color:var(--gold);line-height:1}
+.review-score-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:var(--text-3);margin-top:4px}
+.review-score-max{font-size:9px;color:var(--text-3)}
+.review-body{flex:1;min-width:200px}
+.review-quote{
+  background:var(--bg-ivory);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px 14px 28px;position:relative;margin-bottom:10px;
+}
+.review-quote::before{
+  content:'\201C';position:absolute;top:6px;left:10px;
+  font-family:var(--font-display);font-size:1.8rem;color:var(--border-mid);line-height:1;
+}
+.review-quote-text{font-family:var(--font-display);font-size:12px;font-style:italic;color:var(--text-2);line-height:1.7}
+.review-tags{display:flex;gap:6px;flex-wrap:wrap}
+.review-tag{
+  font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;
+  text-transform:uppercase;letter-spacing:0.04em;
+}
+.review-tag.strong{background:rgba(58,122,74,0.08);color:var(--success)}
+.review-tag.needs-work{background:rgba(138,116,48,0.08);color:var(--gold)}
+.review-tag.weak{background:rgba(138,42,42,0.06);color:var(--error)}
+
+/* Proposal action buttons */
 .proposal-actions{display:flex;gap:8px;flex-direction:column}
 @media(min-width:640px){.proposal-actions{flex-direction:row}}
 
@@ -714,7 +926,6 @@ body{
   border-top:1px solid var(--border);
   background:var(--bg-ivory);flex-shrink:0;position:relative;
 }
-/* Barline — çift çizgi üstte */
 .input-area::before{
   content:'';position:absolute;top:-1px;left:0;right:0;height:3px;
   background:
@@ -781,6 +992,7 @@ body{
   .conv-container{padding:var(--space-xl) var(--space-2xl)}
   .header{padding:14px var(--space-xl)}
   .input-area{padding:var(--space-lg) var(--space-xl)}
+  .progress-tracker{padding:0 var(--space-xl)}
   .welcome-hints{flex-direction:row}
   .piano-key{width:96px;padding:16px 10px 20px}
 }
@@ -788,6 +1000,7 @@ body{
   .header{padding:14px var(--space-2xl)}
   .input-area{padding:var(--space-lg) var(--space-2xl)}
   .conv-container{padding:var(--space-xl) var(--space-3xl)}
+  .progress-tracker{padding:0 var(--space-2xl)}
 }
 @media(min-width:1024px){
   .piano-key{width:104px}
@@ -830,8 +1043,18 @@ body{
   </div>
 </header>
 
-<!-- APP WRAPPER with gate overlay -->
+<!-- ① PROGRESS TRACKER -->
 <div class="app-wrapper locked" id="appWrapper">
+
+<div class="progress-tracker" id="progressTracker">
+  <div class="progress-tracker-inner">
+    <div class="progress-step" id="pStep1" data-step="1"><span class="step-num">1</span>Basics</div>
+    <div class="progress-step" id="pStep2" data-step="2"><span class="step-num">2</span>Science</div>
+    <div class="progress-step" id="pStep3" data-step="3"><span class="step-num">3</span>Impact</div>
+    <div class="progress-step" id="pStep4" data-step="4"><span class="step-num">4</span>Consortium</div>
+    <div class="progress-step" id="pStep5" data-step="5"><span class="step-num">5</span>Implement.</div>
+  </div>
+</div>
 
   <!-- GATE OVERLAY -->
   <div class="gate-overlay" id="gateOverlay">
@@ -868,6 +1091,22 @@ body{
       <input class="gate-input" id="exhaustedEmailInput" type="email" placeholder="your@email.com" autocomplete="email" aria-label="Email for new access request">
       <button class="gate-btn secondary" id="btnExhaustedRequest" type="button"><span class="gate-btn-text">Request New Access</span><span class="gate-spinner" aria-hidden="true"></span></button>
       <div class="gate-msg" id="exhaustedFeedback"></div>
+    </div>
+  </div>
+
+  <!-- ⑤ GENERATION OVERLAY -->
+  <div class="gen-overlay hidden" id="genOverlay">
+    <div class="gen-box">
+      <div class="gen-ring" aria-hidden="true"></div>
+      <div class="gen-title">Composing Your Proposal</div>
+      <div class="gen-sub">Structuring sections, aligning objectives, calculating budget...</div>
+      <div class="gen-steps">
+        <div class="gen-step"><div class="gen-step-icon" id="genS1">1</div><div class="gen-step-label">Parsing</div></div>
+        <div class="gen-step"><div class="gen-step-icon" id="genS2">2</div><div class="gen-step-label">Excellence</div></div>
+        <div class="gen-step"><div class="gen-step-icon" id="genS3">3</div><div class="gen-step-label">Impact</div></div>
+        <div class="gen-step"><div class="gen-step-icon" id="genS4">4</div><div class="gen-step-label">Implement.</div></div>
+        <div class="gen-step"><div class="gen-step-icon" id="genS5">5</div><div class="gen-step-label">DOCX</div></div>
+      </div>
     </div>
   </div>
 
@@ -938,8 +1177,11 @@ body{
   var isWaiting=false,lastBotRaw='',botMessageCount=0;
   var lastProposalData=null,lastDocxBase64=null,lastDocxFilename=null;
 
+  /* WP bar color classes */
+  var WP_COLORS=['c0','c1','c2','c3','c4','c5','c6'];
+
   /* ══════════════════════════════════════
-     GATE SYSTEM
+     GATE SYSTEM (unchanged logic)
      ══════════════════════════════════════ */
   var appWrapper=document.getElementById('appWrapper');
   var gateOverlay=document.getElementById('gateOverlay');
@@ -970,6 +1212,8 @@ body{
     gateOverlay.classList.add('hidden');
     exhaustedOverlay.classList.add('hidden');
     updateUsageBadge(remaining,maxUses);
+    /* ① Show progress tracker on unlock */
+    document.getElementById('progressTracker').classList.add('visible');
   }
   function lockInput(){
     appWrapper.classList.add('locked');
@@ -977,6 +1221,7 @@ body{
     exhaustedOverlay.classList.add('hidden');
     usageBadge.classList.add('hidden');
     resetGateFeedback();
+    document.getElementById('progressTracker').classList.remove('visible');
   }
   function showExhausted(){
     appWrapper.classList.add('locked');
@@ -1090,7 +1335,6 @@ body{
   var themeIcon=document.getElementById('themeIcon');
   var savedTheme=null;
   try{savedTheme=localStorage.getItem('cedulor-theme')}catch(e){}
-  /* KG: OS-level dark mode detection as fallback */
   var osPrefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
   var currentTheme=savedTheme||(osPrefersDark?'dark':'light');
 
@@ -1129,6 +1373,90 @@ body{
   });
 
   /* ══════════════════════════════════════
+     ① PROGRESS TRACKER LOGIC
+     ══════════════════════════════════════ */
+  var currentStep=0;
+  var STEP_KEYWORDS=[
+    ['title','acronym','call','action type','duration','RIA','IA','CSA','months'],
+    ['objective','methodology','state of the art','innovation','TRL','breakthrough','beyond'],
+    ['impact','dissemination','exploitation','stakeholder','beneficiar','communication','KPI'],
+    ['consortium','partner','coordinator','university','SME','organization','country'],
+    ['work package','WP','milestone','deliverable','budget','person-month','resource']
+  ];
+
+  function detectStep(text){
+    if(!text)return;
+    var lower=text.toLowerCase();
+    for(var i=currentStep;i<STEP_KEYWORDS.length;i++){
+      var hits=0;
+      STEP_KEYWORDS[i].forEach(function(kw){if(lower.indexOf(kw.toLowerCase())!==-1)hits++});
+      if(hits>=2&&i>=currentStep){
+        setProgressStep(i+1);
+        return;
+      }
+    }
+  }
+
+  function setProgressStep(step){
+    if(step<=currentStep)return;
+    currentStep=step;
+    for(var i=1;i<=5;i++){
+      var el=document.getElementById('pStep'+i);
+      if(!el)continue;
+      el.classList.remove('done','active');
+      if(i<step)el.classList.add('done');
+      else if(i===step)el.classList.add('active');
+    }
+  }
+
+  function resetProgress(){
+    currentStep=0;
+    for(var i=1;i<=5;i++){
+      var el=document.getElementById('pStep'+i);
+      if(el)el.classList.remove('done','active');
+    }
+  }
+
+  /* ══════════════════════════════════════
+     ⑤ GENERATION OVERLAY LOGIC
+     ══════════════════════════════════════ */
+  var genOverlay=document.getElementById('genOverlay');
+  var genInterval=null;
+
+  function showGenOverlay(){
+    genOverlay.classList.remove('hidden');
+    var steps=['genS1','genS2','genS3','genS4','genS5'];
+    steps.forEach(function(id){
+      var el=document.getElementById(id);
+      if(el)el.className='gen-step-icon';
+    });
+    var idx=0;
+    function advanceStep(){
+      if(idx>0){
+        var prev=document.getElementById(steps[idx-1]);
+        if(prev){prev.className='gen-step-icon done';prev.textContent='\u2713'}
+      }
+      if(idx<steps.length){
+        var cur=document.getElementById(steps[idx]);
+        if(cur){cur.className='gen-step-icon active'}
+        idx++;
+      }else{clearInterval(genInterval)}
+    }
+    advanceStep();
+    genInterval=setInterval(advanceStep,3000);
+  }
+
+  function hideGenOverlay(){
+    clearInterval(genInterval);
+    var steps=['genS1','genS2','genS3','genS4','genS5'];
+    steps.forEach(function(id){
+      var el=document.getElementById(id);
+      if(el){el.className='gen-step-icon done';el.textContent='\u2713'}
+    });
+    setTimeout(function(){genOverlay.classList.add('hidden')},400);
+  }
+
+  /* ══════════════════════════════════════
      FUNCTIONS
      ══════════════════════════════════════ */
   function newSession(){
@@ -1137,6 +1465,7 @@ body{
     lastProposalData=null;lastDocxBase64=null;lastDocxFilename=null;
     lastBotRaw='';botMessageCount=0;
     document.getElementById('docxBtn').classList.remove('visible');
+    resetProgress();
     container.innerHTML='<div class="welcome" id="welcomeScreen"><div class="welcome-logo"><img src="logo.jpg" alt="Cedulor" /></div><h2>Your <em>Proposal</em> Begins Here</h2><div class="welcome-barline" aria-hidden="true"></div><p>Prepare your EU-funded research proposal step by step. Select your programme, share your project idea, and Cedulor will guide you through the full application structure.</p><div class="piano-keys" aria-label="Supported EU programmes"><div class="piano-key">Horizon Europe</div><div class="piano-key">MSCA</div><div class="piano-key">ERC</div><div class="piano-key">EIC Accel.</div></div><div class="welcome-hints" id="welcomeHints"><button class="hint-chip" data-hint="I have a Horizon Europe project idea">Horizon Europe proposal</button><button class="hint-chip" data-hint="Help me prepare an ERC application">ERC application</button><button class="hint-chip" data-hint="I need to draft an MSCA fellowship proposal">MSCA fellowship</button><button class="hint-chip" data-hint="I want to prepare an EIC Accelerator pitch">EIC Accelerator</button></div></div>';
     showSuccess('New session started.');
   }
@@ -1176,38 +1505,175 @@ body{
     return html;
   }
 
+  function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
   function fmtNum(n){return Number(n||0).toLocaleString('en-US')}
 
+  /* ══════════════════════════════════════
+     ② ③ ④ ⑥ ENHANCED PROPOSAL CARD
+     ══════════════════════════════════════ */
   function buildProposalCard(data){
     var m=data.metadata||{};
-    var s3=data.section_3_implementation||{};
-    var wpCount=(s3.s3_1_work_packages||[]).length;
-    var partnerCount=(s3.s3_2_consortium&&s3.s3_2_consortium.partners?s3.s3_2_consortium.partners.length:0)+(s3.s3_2_consortium&&s3.s3_2_consortium.coordinator?1:0);
-    var msCount=(s3.s3_3_milestones||[]).length;
-    var dlCount=(s3.s3_4_deliverables||[]).length;
     var s1=data.section_1_excellence||{};
     var s2=data.section_2_impact||{};
+    var s3=data.section_3_implementation||{};
+    var wps=s3.s3_1_work_packages||[];
+    var consortium=s3.s3_2_consortium||{};
+    var partners=consortium.partners||[];
+    var coordinator=consortium.coordinator;
+    var milestones=s3.s3_3_milestones||[];
+    var deliverables=s3.s3_4_deliverables||[];
+    var budget=s3.s3_5_budget_summary||{};
 
-    return '<div class="proposal-card">'
-      +'<div class="proposal-card-header">'
-      +'<div class="proposal-card-icon" aria-hidden="true">&#9834;</div>'
-      +'<div class="proposal-card-title"><h3>'+(m.project_title||'Proposal Draft')+'</h3>'
-      +'<span>'+(m.acronym||'')+' &middot; '+(m.call_identifier||'')+' &middot; '+(m.action_type||'RIA')+'</span></div></div>'
-      +'<div class="proposal-meta-grid">'
-      +'<div class="proposal-meta-item"><label>Duration</label><span>'+(m.duration_months||'\u2014')+' mo.</span></div>'
-      +'<div class="proposal-meta-item"><label>TRL Range</label><span>'+(m.trl_start||'?')+' \u2192 '+(m.trl_target||'?')+'</span></div>'
-      +'<div class="proposal-meta-item"><label>Budget</label><span>\u20AC '+fmtNum(m.total_budget_eur)+'</span></div>'
-      +'<div class="proposal-meta-item"><label>EU Contrib.</label><span>\u20AC '+fmtNum(m.eu_contribution_eur)+'</span></div>'
-      +'</div>'
-      +'<div class="proposal-sections">'
-      +'<div class="proposal-section-row"><span class="check" aria-hidden="true">\u2713</span> Section 1 \u2014 Excellence ('+(s1.s1_1_objectives_and_ambition?'complete':'pending')+')</div>'
-      +'<div class="proposal-section-row"><span class="check" aria-hidden="true">\u2713</span> Section 2 \u2014 Impact ('+(s2.s2_1_pathways_towards_impact?'complete':'pending')+')</div>'
-      +'<div class="proposal-section-row"><span class="check" aria-hidden="true">\u2713</span> Section 3 \u2014 Implementation ('+wpCount+' WPs, '+partnerCount+' partners, '+msCount+' milestones, '+dlCount+' deliverables)</div>'
-      +'</div>'
-      +'<div class="proposal-actions">'
-      +'<button class="proposal-action-btn primary" id="dlDocx"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Download Part B (DOCX)</button>'
-      +'<button class="proposal-action-btn secondary" id="dlJson"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>Download JSON</button>'
-      +'</div></div>';
+    /* ── Completeness calc ── */
+    var subSections=['s1_1_objectives_and_ambition','s1_2_relation_to_work_programme','s1_3_concept_and_methodology','s1_4_interdisciplinary_considerations'];
+    var s1Filled=0;subSections.forEach(function(k){if(s1[k])s1Filled++});
+    var s2Keys=['s2_1_pathways_towards_impact','s2_2_dissemination_exploitation_communication','s2_3_impact_indicators'];
+    var s2Filled=0;s2Keys.forEach(function(k){if(s2[k])s2Filled++});
+    var s3Parts=[wps.length>0,partners.length>0||coordinator,milestones.length>0,deliverables.length>0,budget.personnel_costs>0];
+    var s3Filled=0;s3Parts.forEach(function(b){if(b)s3Filled++});
+    var totalFilled=s1Filled+s2Filled+s3Filled;
+    var totalSubs=subSections.length+s2Keys.length+s3Parts.length;
+    var pct=Math.round(totalFilled/totalSubs*100);
+
+    /* ── Budget donut data ── */
+    var budgetItems=[
+      {label:'Personnel',val:budget.personnel_costs||0,color:'var(--ink)'},
+      {label:'Equipment',val:budget.equipment||0,color:'var(--gold)'},
+      {label:'Subcontracting',val:budget.subcontracting||0,color:'var(--wine)'},
+      {label:'Travel + Other',val:(budget.travel_costs||0)+(budget.other_direct_costs||0),color:'var(--ink-muted)'},
+      {label:'Indirect',val:budget.indirect_costs||0,color:'var(--stone-light)'}
+    ];
+    var budgetTotal=0;budgetItems.forEach(function(b){budgetTotal+=b.val});
+
+    /* ── SVG ring for completeness ── */
+    var circumf=2*Math.PI*22;
+    var offset=circumf-(pct/100)*circumf;
+    var completenessRing='<div class="completeness-ring"><svg viewBox="0 0 56 56"><circle class="ring-bg" cx="28" cy="28" r="22"/><circle class="ring-fill" cx="28" cy="28" r="22" stroke-dasharray="'+circumf+'" stroke-dashoffset="'+offset+'"/></svg><div class="ring-text">'+pct+'%</div></div>';
+
+    /* ── SVG donut for budget ── */
+    var donutSvg='<div class="budget-donut"><svg viewBox="0 0 56 56">';
+    var donutR=22,donutCircumf=2*Math.PI*donutR,donutOffset=0;
+    budgetItems.forEach(function(item){
+      if(budgetTotal<=0)return;
+      var segLen=(item.val/budgetTotal)*donutCircumf;
+      donutSvg+='<circle class="donut-segment" cx="28" cy="28" r="'+donutR+'" stroke="'+item.color+'" stroke-dasharray="'+segLen+' '+(donutCircumf-segLen)+'" stroke-dashoffset="-'+donutOffset+'"/>';
+      donutOffset+=segLen;
+    });
+    var totalBudgetDisplay=budgetTotal>=1000000?'\u20AC'+(budgetTotal/1000000).toFixed(1)+'M':'\u20AC'+fmtNum(budgetTotal);
+    donutSvg+='</svg><div class="donut-text">'+totalBudgetDisplay+'</div></div>';
+
+    var budgetLegend='<div class="budget-legend">';
+    budgetItems.forEach(function(item){
+      if(item.val<=0)return;
+      var pctB=budgetTotal>0?Math.round(item.val/budgetTotal*100):0;
+      budgetLegend+='<div class="budget-legend-item"><span class="budget-legend-dot" style="background:'+item.color+'"></span>'+esc(item.label)+' ('+pctB+'%)</div>';
+    });
+    budgetLegend+='</div>';
+
+    /* ── Section depth status ── */
+    function depthStatus(filled,total){
+      if(filled>=total)return{text:filled+'/'+total+' complete',cls:'complete',barCls:'full',w:100};
+      if(filled>0)return{text:filled+'/'+total+' complete',cls:'partial',barCls:'mid',w:Math.round(filled/total*100)};
+      return{text:'pending',cls:'pending',barCls:'low',w:0};
+    }
+    var ds1=depthStatus(s1Filled,subSections.length);
+    var ds2=depthStatus(s2Filled,s2Keys.length);
+    var ds3=depthStatus(s3Filled,s3Parts.length);
+
+    /* ── Partner chips ── */
+    var partnerHtml='';
+    if(coordinator||partners.length>0){
+      partnerHtml='<div class="consortium-section"><div class="consortium-section-label">Consortium</div><div class="consortium-row">';
+      if(coordinator){
+        var cc=coordinator.country||'';
+        partnerHtml+='<div class="partner-chip"><div class="partner-flag">'+esc(cc.substring(0,2).toUpperCase())+'</div><div><div class="partner-name">'+esc(coordinator.name||'Coordinator')+'</div><div class="partner-type">'+esc(coordinator.type||'')+'</div></div><span class="partner-role-badge">Coord.</span></div>';
+      }
+      partners.forEach(function(p){
+        var pc=p.country||'';
+        var role=p.role||'';
+        partnerHtml+='<div class="partner-chip"><div class="partner-flag">'+esc(pc.substring(0,2).toUpperCase())+'</div><div><div class="partner-name">'+esc(p.name||'Partner')+'</div><div class="partner-type">'+esc(p.type||'')+'</div></div>'+(role?'<span class="partner-role-badge">'+esc(role)+'</span>':'')+'</div>';
+      });
+      partnerHtml+='</div></div>';
+    }
+
+    /* ── WP Timeline ── */
+    var wpHtml='';
+    if(wps.length>0){
+      var maxMonth=m.duration_months||36;
+      wps.forEach(function(wp){if(wp.end_month&&wp.end_month>maxMonth)maxMonth=wp.end_month});
+      wpHtml='<div class="wp-timeline-section"><div class="wp-timeline-label">Work Package Timeline</div>';
+      wps.forEach(function(wp,i){
+        var sm=wp.start_month||1,em=wp.end_month||maxMonth;
+        var left=((sm-1)/maxMonth*100).toFixed(1);
+        var width=((em-sm+1)/maxMonth*100).toFixed(1);
+        var colorCls=WP_COLORS[i%WP_COLORS.length];
+        wpHtml+='<div class="wp-row"><div class="wp-row-label">WP'+(wp.wp_number||i+1)+' '+esc(wp.title||'')+'</div><div class="wp-bar-track"><div class="wp-bar '+colorCls+'" style="left:'+left+'%;width:'+width+'%">M'+sm+'\u2013M'+em+'</div></div></div>';
+      });
+      wpHtml+='<div class="wp-months-row"><span>M1</span><span>M'+Math.round(maxMonth/3)+'</span><span>M'+Math.round(maxMonth*2/3)+'</span><span>M'+maxMonth+'</span></div>';
+      wpHtml+='</div>';
+    }
+
+    /* ── Review card ⑥ ── */
+    var reviewHtml='';
+    var review=data.review||data.review_score;
+    if(review){
+      var score=review.score||review.overall_score||0;
+      var summary=review.summary||review.feedback||'';
+      var ratings=review.section_ratings||{};
+      reviewHtml='<div class="review-card"><div class="review-header"><div class="review-score"><div class="review-score-num">'+Number(score).toFixed(1)+'</div><div class="review-score-label">Review Score</div><div class="review-score-max">/ 10</div></div><div class="review-body"><div class="review-quote"><div class="review-quote-text">'+esc(summary)+'</div></div><div class="review-tags">';
+      ['excellence','impact','implementation'].forEach(function(key){
+        var val=ratings[key]||'';
+        if(!val)return;
+        var lower=val.toLowerCase();
+        var cls=lower.indexOf('strong')!==-1||lower.indexOf('good')!==-1?'strong':(lower.indexOf('weak')!==-1?'weak':'needs-work');
+        reviewHtml+='<span class="review-tag '+cls+'">'+esc(key)+': '+esc(val)+'</span>';
+      });
+      reviewHtml+='</div></div></div></div>';
+    }
+
+    /* ── Assemble card ── */
+    var html='<div class="proposal-card">';
+    /* Header */
+    html+='<div class="proposal-card-header"><div class="proposal-card-icon" aria-hidden="true">&#9834;</div><div class="proposal-card-title"><h3>'+esc(m.project_title||'Proposal Draft')+'</h3><span>'+esc(m.acronym||'')+' \u00B7 '+esc(m.call_identifier||'')+' \u00B7 '+esc(m.action_type||'RIA')+'</span></div></div>';
+    /* Meta grid */
+    html+='<div class="proposal-meta-grid">';
+    html+='<div class="proposal-meta-item"><label>Duration</label><span>'+(m.duration_months||'\u2014')+' mo.</span></div>';
+    html+='<div class="proposal-meta-item"><label>TRL Range</label><span>'+(m.trl_start||'?')+' \u2192 '+(m.trl_target||'?')+'</span></div>';
+    html+='<div class="proposal-meta-item"><label>Budget</label><span>\u20AC '+fmtNum(m.total_budget_eur)+'</span></div>';
+    html+='<div class="proposal-meta-item"><label>EU Contrib.</label><span>\u20AC '+fmtNum(m.eu_contribution_eur)+'</span></div>';
+    html+='</div>';
+
+    /* ④ Completeness + Budget */
+    html+='<div class="proposal-stats-row">';
+    html+='<div class="completeness-group">'+completenessRing+'<div class="completeness-info"><strong>Proposal Completeness</strong>'+totalFilled+' of '+totalSubs+' sub-sections filled</div></div>';
+    if(budgetTotal>0){
+      html+='<div class="budget-group">'+donutSvg+budgetLegend+'</div>';
+    }
+    html+='</div>';
+
+    /* ② Section depth cards */
+    html+='<div class="depth-grid">';
+    html+='<div class="depth-card"><div class="depth-card-label">Section 1</div><div class="depth-card-title">Excellence</div><div class="depth-card-status '+ds1.cls+'">'+ds1.text+'</div><div class="depth-card-bar"><div class="depth-card-bar-fill '+ds1.barCls+'" style="width:'+ds1.w+'%"></div></div></div>';
+    html+='<div class="depth-card"><div class="depth-card-label">Section 2</div><div class="depth-card-title">Impact</div><div class="depth-card-status '+ds2.cls+'">'+ds2.text+'</div><div class="depth-card-bar"><div class="depth-card-bar-fill '+ds2.barCls+'" style="width:'+ds2.w+'%"></div></div></div>';
+    html+='<div class="depth-card"><div class="depth-card-label">Section 3</div><div class="depth-card-title">Implementation</div><div class="depth-card-status '+ds3.cls+'">'+ds3.text+'</div><div class="depth-card-bar"><div class="depth-card-bar-fill '+ds3.barCls+'" style="width:'+ds3.w+'%"></div></div></div>';
+    html+='</div>';
+
+    /* ③ Consortium */
+    html+=partnerHtml;
+
+    /* ③ WP Timeline */
+    html+=wpHtml;
+
+    /* ⑥ Review */
+    html+=reviewHtml;
+
+    /* Actions */
+    html+='<div class="proposal-actions">';
+    html+='<button class="proposal-action-btn primary" id="dlDocx"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Download Part B (DOCX)</button>';
+    html+='<button class="proposal-action-btn secondary" id="dlJson"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>Download JSON</button>';
+    html+='</div>';
+    html+='</div>';
+    return html;
   }
 
   /* Delegated click for proposal card buttons */
@@ -1227,12 +1693,16 @@ body{
       parsedContent=parseMarkdown(content);
       if(proposalData)parsedContent+=buildProposalCard(proposalData);
     }else{
-      parsedContent='<p>'+content+'</p>';
+      parsedContent='<p>'+esc(content)+'</p>';
     }
     msg.innerHTML='<div class="msg-avatar" aria-hidden="true">'+avatarText+'</div><div class="msg-content">'+parsedContent+'</div>';
     container.appendChild(msg);
     container.scrollTop=container.scrollHeight;
-    if(type==='bot'){lastBotRaw=content;botMessageCount++}
+    if(type==='bot'){
+      lastBotRaw=content;botMessageCount++;
+      /* ① detect progress from bot responses */
+      detectStep(content);
+    }
   }
 
   function showTyping(){
@@ -1253,13 +1723,29 @@ body{
     var text=messageInput.value.trim();
     if(!text||isWaiting)return;
     addMessage(text,'user');messageInput.value='';messageInput.style.height='auto';
-    isWaiting=true;sendBtn.disabled=true;showTyping();
+    isWaiting=true;sendBtn.disabled=true;
+
+    /* ① detect progress from user messages too */
+    detectStep(text);
+
+    /* ⑤ Decide: generation overlay or typing indicator */
+    var isGenerating=false;
+    var lower=text.toLowerCase();
+    if(lower.indexOf('generate')!==-1||lower.indexOf('go ahead')!==-1||lower.indexOf('yes')!==-1||lower.indexOf('proceed')!==-1||lower.indexOf('create the proposal')!==-1||lower.indexOf('draft it')!==-1){
+      if(botMessageCount>=3){isGenerating=true}
+    }
+
+    if(isGenerating){showGenOverlay()}
+    else{showTyping()}
 
     try{
       var headers={'Content-Type':'application/json'};
       if(CONFIG.apiKey)headers['x-api-key']=CONFIG.apiKey;
       var res=await fetch(ENDPOINTS.chat,{method:'POST',headers:headers,body:JSON.stringify({message:text,session_id:CONFIG.sessionId,token:sessionToken})});
-      hideTyping();
+
+      if(isGenerating){hideGenOverlay()}
+      else{hideTyping()}
+
       if(res.status===401){clearToken();lockInput();return}
       if(!res.ok)throw new Error('Server error ('+res.status+')');
       var rawText=await res.text();var data;
@@ -1270,6 +1756,8 @@ body{
         lastDocxFilename=data.filename||'Cedulor_PartB_Draft.docx';
         document.getElementById('docxBtn').classList.add('visible');
         addMessage(data.message||'Your proposal draft is ready.','bot',lastProposalData);
+        /* ① Mark all steps done on proposal complete */
+        setProgressStep(6);
         remainingUses=Math.max(0,remainingUses-1);
         updateUsageBadge(remainingUses,null);
         if(remainingUses<=0){showExhausted();return}
@@ -1277,11 +1765,14 @@ body{
       }else if(data&&data.proposal_json&&!data.docx_base64){
         lastProposalData=data.proposal_json;
         addMessage(data.message||data.conversation_text||'Your structured proposal data is ready.','bot',lastProposalData);
+        setProgressStep(6);
       }else if(data&&data.conversation_text){
         addMessage(data.conversation_text,'bot');
       }else{addMessage(rawText,'bot')}
     }catch(err){
-      hideTyping();showError('Connection failed. Please try again.');console.error(err);
+      if(isGenerating){hideGenOverlay()}
+      else{hideTyping()}
+      showError('Connection failed. Please try again.');console.error(err);
     }finally{isWaiting=false;sendBtn.disabled=false;messageInput.focus()}
   }
 
