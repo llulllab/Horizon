@@ -1280,8 +1280,24 @@ body{
     request:API_BASE+'/horizon-access-request'
   };
 
+  /* Generate or restore persistent session ID */
+  function getSessionId(){
+    var key='cedulor_session_id';
+    var existing=null;
+    try{existing=sessionStorage.getItem(key)}catch(e){}
+    if(existing)return existing;
+    var id='session-'+(typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID().slice(0,12):Math.random().toString(36).substr(2,9))+'-'+Date.now().toString(36).substr(-4);
+    try{sessionStorage.setItem(key,id)}catch(e){}
+    return id;
+  }
+  function resetSessionId(){
+    var id='session-'+Math.random().toString(36).substr(2,9)+Date.now().toString(36).substr(-4);
+    try{sessionStorage.setItem('cedulor_session_id',id)}catch(e){}
+    return id;
+  }
+
   var CONFIG={
-    sessionId:'session-'+(typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID().slice(0,12):Math.random().toString(36).substr(2,9)),
+    sessionId:getSessionId(),
     apiKey:''
   };
 
@@ -1485,25 +1501,38 @@ body{
 
   /* ══════════════════════════════════════
      ① PROGRESS TRACKER LOGIC
+     ══════════════════════════════════════
+     Progress advances ONLY from bot responses,
+     not from user messages. This prevents the user
+     dumping all info in one message and seeing
+     4 steps complete before the bot acknowledges.
      ══════════════════════════════════════ */
   var currentStep=0;
-  var STEP_KEYWORDS=[
-    ['title','acronym','call','action type','duration','RIA','IA','CSA','months'],
-    ['objective','methodology','state of the art','innovation','TRL','breakthrough','beyond'],
-    ['impact','dissemination','exploitation','stakeholder','beneficiar','communication','KPI'],
-    ['consortium','partner','coordinator','university','SME','organization','country'],
-    ['work package','WP','milestone','deliverable','budget','person-month','resource']
+
+  /* Bot confirmation keywords — things the bot says when it acknowledges a step */
+  var STEP_BOT_KEYWORDS=[
+    /* Step 1: Basics confirmed */
+    ['noted','got it','received','project basics','title','acronym','recorded','let me summarize','summary of','call identifier','action type','duration'],
+    /* Step 2: Science confirmed */
+    ['objectives','methodology','state of the art','scientific','TRL','innovation','concept','beyond the state','approach','ambition'],
+    /* Step 3: Impact confirmed */
+    ['impact','dissemination','exploitation','stakeholder','beneficiar','communication','KPI','pathway','societal'],
+    /* Step 4: Consortium confirmed */
+    ['consortium','partner','coordinator','complementarity','added value','organization'],
+    /* Step 5: Implementation confirmed */
+    ['work package','milestone','deliverable','budget','person-month','implementation','gantt','timeline','resource']
   ];
 
   function detectStep(text){
     if(!text)return;
     var lower=text.toLowerCase();
-    for(var i=currentStep;i<STEP_KEYWORDS.length;i++){
+    /* Scan from current step forward, require 2+ keyword matches */
+    for(var i=currentStep;i<STEP_BOT_KEYWORDS.length;i++){
       var hits=0;
-      STEP_KEYWORDS[i].forEach(function(kw){if(lower.indexOf(kw.toLowerCase())!==-1)hits++});
+      STEP_BOT_KEYWORDS[i].forEach(function(kw){if(lower.indexOf(kw)!==-1)hits++});
       if(hits>=2&&i>=currentStep){
         setProgressStep(i+1);
-        return;
+        /* don't return — allow multi-step jumps if bot confirms several at once */
       }
     }
   }
@@ -1635,7 +1664,7 @@ body{
      ══════════════════════════════════════ */
   function newSession(){
     if(isWaiting)return;
-    CONFIG.sessionId='session-'+Math.random().toString(36).substr(2,9)+Date.now().toString(36).substr(-4);
+    CONFIG.sessionId=resetSessionId();
     lastProposalData=null;lastDocxBase64=null;lastDocxFilename=null;
     lastBotRaw='';botMessageCount=0;
     document.getElementById('docxBtn').classList.remove('visible');
@@ -1915,9 +1944,6 @@ body{
     if(!text||isWaiting)return;
     addMessage(text,'user');messageInput.value='';messageInput.style.height='auto';
     isWaiting=true;sendBtn.disabled=true;
-
-    /* ① detect progress from user messages too */
-    detectStep(text);
 
     /* ⑤ Decide: generation overlay or typing indicator */
     var isGenerating=false;
