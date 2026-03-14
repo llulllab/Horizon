@@ -1858,6 +1858,11 @@ body{
   });
 
   function addMessage(content,type,proposalData){
+    /* Guard: skip empty bot messages */
+    if(type==='bot'&&!proposalData){
+      var stripped=(content||'').replace(/^=\s*/,'').trim();
+      if(!stripped||stripped==='null'||stripped==='undefined')return;
+    }
     var welcome=document.getElementById('welcomeScreen');
     if(welcome&&!welcome.classList.contains('mini')){
       welcome.classList.add('mini');
@@ -1952,9 +1957,23 @@ body{
         lastProposalData=data.proposal_json;
         addMessage(data.message||data.conversation_text||'Your structured proposal data is ready.','bot',lastProposalData);
         setProgressStep(6);
-      }else if(data&&data.conversation_text){
-        addMessage(data.conversation_text,'bot');
-      }else{addMessage(rawText,'bot')}
+      }else{
+        /* Extract text from any known response field */
+        var botText='';
+        if(data){
+          botText=data.conversation_text||data.output||data.response||data.text||data.message||data.answer||data.reply||'';
+          /* n8n agent sometimes nests output */
+          if(!botText&&data.data){botText=data.data.conversation_text||data.data.output||data.data.text||data.data.message||''}
+          if(!botText&&typeof data==='string'){botText=data}
+        }
+        if(!botText)botText=rawText||'';
+        /* Strip leading = sign that n8n sometimes prepends */
+        botText=botText.replace(/^=\s*/,'').trim();
+        /* Only add message if there's actual content */
+        if(botText&&botText!=='null'&&botText!=='undefined'&&botText.length>1){
+          addMessage(botText,'bot');
+        }
+      }
     }catch(err){
       if(isGenerating){hideGenOverlay()}
       else{hideTyping()}
