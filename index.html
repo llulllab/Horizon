@@ -1972,6 +1972,9 @@ body{
         /* Only add message if there's actual content */
         if(botText&&botText!=='null'&&botText!=='undefined'&&botText.length>1){
           addMessage(botText,'bot');
+        }else{
+          /* Empty response — server likely overloaded */
+          addMessage('The server is momentarily busy. Please resend your last message.','bot');
         }
       }
     }catch(err){
